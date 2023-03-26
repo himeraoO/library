@@ -1,9 +1,9 @@
 package com.github.himeraoo.library.servlets;
 
-import com.github.himeraoo.library.dao.AuthorDAO;
-import com.github.himeraoo.library.dao.AuthorDAOImpl;
-import com.github.himeraoo.library.dao.jdbc.SessionManager;
-import com.github.himeraoo.library.dao.jdbc.SessionManagerJDBC;
+import com.github.himeraoo.library.dao.AuthorRepository;
+import com.github.himeraoo.library.dao.AuthorRepositoryImpl;
+import com.github.himeraoo.library.jdbc.SessionManager;
+import com.github.himeraoo.library.jdbc.SessionManagerJDBC;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -14,7 +14,7 @@ import javax.servlet.annotation.WebListener;
 public class ContextListener implements ServletContextListener {
 
     private SessionManager sessionManager;
-    private AuthorDAO authorDAO;
+    private AuthorRepository authorRepository;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -22,10 +22,10 @@ public class ContextListener implements ServletContextListener {
         final ServletContext servletContext = servletContextEvent.getServletContext();
 
         sessionManager = new SessionManagerJDBC();
-        authorDAO = new AuthorDAOImpl(sessionManager);
+//        authorRepository = new AuthorRepositoryImpl(sessionManager, authorDAO);
 
         servletContext.setAttribute("JDBCSession", sessionManager);
-        servletContext.setAttribute("authorDao", authorDAO);
+//        servletContext.setAttribute("authorDao", authorRepository);
     }
 
     @Override

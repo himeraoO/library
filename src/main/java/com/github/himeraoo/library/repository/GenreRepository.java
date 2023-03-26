@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface GenreRepository {
-    Optional<Genre> findById(int id) throws SQLException;
+    Optional<Genre> findById(int genreId) throws SQLException;
 
     List<Genre> findAll() throws SQLException;
 
@@ -15,5 +15,5 @@ public interface GenreRepository {
 
     int update(Genre genre) throws SQLException;
 
-    int deleteById(int id) throws SQLException;
+    int deleteById(int genreId) throws SQLException;
 }

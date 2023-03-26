@@ -1,4 +1,4 @@
-package com.github.himeraoo.library.dao.jdbc;
+package com.github.himeraoo.library.jdbc;
 
 import java.sql.Connection;
 

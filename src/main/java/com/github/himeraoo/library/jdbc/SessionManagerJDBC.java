@@ -1,6 +1,6 @@
-package com.github.himeraoo.library.dao.jdbc;
+package com.github.himeraoo.library.jdbc;
 
-import com.github.himeraoo.library.dao.AuthorDAOImpl;
+import com.github.himeraoo.library.dao.AuthorRepositoryImpl;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -95,10 +95,5 @@ public class SessionManagerJDBC implements SessionManager {
         } catch (SQLException ex) {
             throw new SessionManagerException(ex);
         }
-    }
-
-    public static void main(String[] args) throws SQLException {
-        AuthorDAOImpl authorDAO = new AuthorDAOImpl(new SessionManagerJDBC());
-        System.out.println(authorDAO.findById(1).get().toString());
     }
 }

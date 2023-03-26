@@ -2,19 +2,18 @@ package com.github.himeraoo.library.dao;
 
 import com.github.himeraoo.library.models.Book;
 
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
 public interface BookDAO {
+    Optional<Book> findBookById(int bookId, Connection connection) throws SQLException;
 
-    Optional<Book> findById(int id) throws SQLException;
+    List<Book> findAllBook(Connection connection) throws SQLException;
 
-    List<Book> findAll() throws SQLException;
+    int saveBook(Book book, Connection connection) throws SQLException;
 
-    int save(Book book) throws SQLException;
+    int updatedBook(Book book, Connection connection) throws SQLException;
 
-    int update(Book book) throws SQLException;
-
-    int deleteById(int id) throws SQLException;
+    int deleteBook(int bookId, Connection connection) throws SQLException;
 }

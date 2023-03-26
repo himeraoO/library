@@ -1,4 +1,4 @@
-package com.github.himeraoo.library.dao.jdbc;
+package com.github.himeraoo.library.jdbc;
 
 public class SessionManagerException extends RuntimeException{
     public SessionManagerException(String message) {

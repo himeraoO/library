@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public class GenreDAOImpl implements GenreDAO {
 
-    public Optional<Genre> findGenreById(int id, Connection connection) throws SQLException {
+    public Optional<Genre> findGenreById(int genreId, Connection connection) throws SQLException {
         try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreFindById.QUERY)) {
-            pst.setInt(1, id);
+            pst.setInt(1, genreId);
 
             Genre dbGenre = new Genre();
 
@@ -66,10 +66,10 @@ public class GenreDAOImpl implements GenreDAO {
         return rowsUpdated;
     }
 
-    public int deleteGenre(int id, Connection connection) throws SQLException {
+    public int deleteGenre(int genreId, Connection connection) throws SQLException {
         int rowsUpdated;
         try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreDeleteById.QUERY)) {
-            pst.setInt(1, id);
+            pst.setInt(1, genreId);
 
             rowsUpdated = pst.executeUpdate();
         }

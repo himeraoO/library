@@ -1,7 +1,7 @@
 package com.github.himeraoo.library.repository;
 
 import com.github.himeraoo.library.dao.GenreDAO;
-import com.github.himeraoo.library.dao.jdbc.SessionManager;
+import com.github.himeraoo.library.jdbc.SessionManager;
 import com.github.himeraoo.library.models.Genre;
 
 import java.sql.*;
@@ -20,13 +20,13 @@ public class GenreRepositoryImpl implements GenreRepository {
     }
 
     @Override
-    public Optional<Genre> findById(int id) throws SQLException {
+    public Optional<Genre> findById(int genreId) throws SQLException {
 
         sessionManager.beginSession();
 
         try (Connection connection = sessionManager.getCurrentSession()) {
 
-            return genreDAO.findGenreById(id, connection);
+            return genreDAO.findGenreById(genreId, connection);
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
             throw ex;
@@ -88,7 +88,7 @@ public class GenreRepositoryImpl implements GenreRepository {
     }
 
     @Override
-    public int deleteById(int id) throws SQLException {
+    public int deleteById(int genreId) throws SQLException {
         int rowsUpdated = 0;
 
         sessionManager.beginSession();
@@ -97,7 +97,7 @@ public class GenreRepositoryImpl implements GenreRepository {
 
             sessionManager.startTransaction();
 
-            rowsUpdated = genreDAO.deleteGenre(id, connection);
+            rowsUpdated = genreDAO.deleteGenre(genreId, connection);
 
             sessionManager.finishTransaction();
             sessionManager.commitSession();

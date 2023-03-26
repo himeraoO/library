@@ -3,21 +3,27 @@ package com.github.himeraoo.library.dao;
 public enum SQLQuery {
     QUERY_AuthorFindById(
             "select a.id as aid, a.name as aname, a.surname as asurname, " +
-            "b.id as bid, b.title as btitle " +
+            "b.id as bid, b.title as btitle, " +
+            "g.id as gid, g.name as gname " +
             "from author as a " +
             "inner join authors_books as ab " +
             "on a.id=ab.author_id " +
             "inner join book as b " +
             "on b.id=ab.book_id " +
+            "inner join genre as g " +
+            "on b.genre_id = g.id " +
             "where a.id = ?"),
     QUERY_AuthorFindAll(
             "select a.id as aid, a.name as aname, a.surname as asurname, " +
-            "b.id as bid, b.title as btitle " +
+            "b.id as bid, b.title as btitle, " +
+            "g.id as gid, g.name as gname " +
             "from author as a " +
             "inner join authors_books as ab " +
             "on a.id=ab.author_id " +
             "inner join book as b " +
-            "on b.id=ab.book_id"),
+            "on b.id=ab.book_id " +
+            "inner join genre as g " +
+            "on b.genre_id = g.id"),
     QUERY_AuthorUpdateById(
             "update author " +
             "set name = ?, surname = ? " +
@@ -36,6 +42,18 @@ public enum SQLQuery {
                     "inner join book as b " +
                     "on b.id=ab.book_id " +
                     "where b.id = ?"),
+
+    QUERY_AllBookFindByAuthorId(
+            "select b.id as bid, b.title as btitle, " +
+            "g.id as gid, g.name as gname " +
+            "from book as b " +
+            "inner join authors_books as ab " +
+            "on b.id=ab.book_id " +
+            "inner join genre as g " +
+            "on b.genre_id = g.id " +
+            "inner join author as a " +
+            "on a.id=ab.author_id " +
+            "where a.id = ?"),
 
     QUERY_RemoveRelationAuthorsBooks(
             "delete from authors_books " +
@@ -83,7 +101,6 @@ public enum SQLQuery {
             "select id, title, genre_id " +
             "from book " +
             "where id = ?"),
-
 
     QUERY_GenreFindById(
             "select id, name " +
