@@ -92,7 +92,20 @@ public enum SQLQuery {
 
     QUERY_GenreSave(
             "insert into genre (name) " +
-            "VALUES (?)");
+            "VALUES (?)"),
+
+    QUERY_GenreFindAll(
+            "select id, name " +
+            "from genre"),
+
+    QUERY_GenreUpdateById(
+            "update genre " +
+            "set name = ? " +
+            "where id = ?"),
+
+    QUERY_GenreDeleteById(
+            "delete from genre " +
+            "where id = ?");
 
     String QUERY;
 

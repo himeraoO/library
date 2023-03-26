@@ -223,13 +223,13 @@ public class BookDAOImpl implements BookDAO{
     }
 
     private void checkAddGenre(Genre genre, Connection connection) throws SQLException {
-         Optional<Genre> optionalGenre = findGenreById(genre, connection);
+         Optional<Genre> optionalGenre = findGenreById(genre.getId(), connection);
          if (!optionalGenre.isPresent()){
-             addGenre(genre, connection);
+             saveGenre(genre, connection);
          }
     }
 
-    private int addGenre(Genre genre, Connection connection) throws SQLException {
+    private int saveGenre(Genre genre, Connection connection) throws SQLException {
         try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreSave.QUERY, Statement.RETURN_GENERATED_KEYS)) {
             pst.setString(1, genre.getName());
             pst.executeUpdate();
@@ -241,16 +241,16 @@ public class BookDAOImpl implements BookDAO{
         }
     }
 
-    private Optional<Genre> findGenreById(Genre genre, Connection connection) throws SQLException {
+    private Optional<Genre> findGenreById(int id, Connection connection) throws SQLException {
         try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreFindById.QUERY)) {
-            pst.setInt(1, genre.getId());
+            pst.setInt(1, id);
 
             Genre dbGenre = new Genre();
 
             try (ResultSet rs = pst.executeQuery()) {
                 rs.next();
-                genre.setId((Integer.parseInt(rs.getString("id"))));
-                genre.setName((rs.getString("name")));
+                dbGenre.setId((Integer.parseInt(rs.getString("id"))));
+                dbGenre.setName((rs.getString("name")));
             }
             return Optional.ofNullable(dbGenre);
         }
