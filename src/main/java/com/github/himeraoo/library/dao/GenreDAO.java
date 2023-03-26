@@ -2,18 +2,18 @@ package com.github.himeraoo.library.dao;
 
 import com.github.himeraoo.library.models.Genre;
 
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
 public interface GenreDAO {
-    Optional<Genre> findById(int id) throws SQLException;
+    Optional<Genre> findGenreById(int id, Connection connection) throws SQLException;
 
-    List<Genre> findAll() throws SQLException;
+    List<Genre> findAllGenre(Connection connection) throws SQLException;
 
-    int save(Genre genre) throws SQLException;
+    int saveGenre(Genre genre, Connection connection) throws SQLException;
 
-    int update(Genre genre) throws SQLException;
+    int updatedGenre(Genre genre, Connection connection) throws SQLException;
 
-    int deleteById(int id) throws SQLException;
+    int deleteGenre(int id, Connection connection) throws SQLException;
 }
