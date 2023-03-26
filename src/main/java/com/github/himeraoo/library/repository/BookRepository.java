@@ -1,4 +1,4 @@
-package com.github.himeraoo.library.dao;
+package com.github.himeraoo.library.repository;
 
 import com.github.himeraoo.library.models.Book;
 

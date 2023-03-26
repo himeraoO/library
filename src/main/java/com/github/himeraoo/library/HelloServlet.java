@@ -1,6 +1,6 @@
 package com.github.himeraoo.library;
 
-import com.github.himeraoo.library.dao.AuthorRepository;
+import com.github.himeraoo.library.repository.AuthorRepository;
 import com.github.himeraoo.library.jdbc.SessionManager;
 
 import java.io.*;

@@ -1,7 +1,5 @@
 package com.github.himeraoo.library.jdbc;
 
-import com.github.himeraoo.library.dao.AuthorRepositoryImpl;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

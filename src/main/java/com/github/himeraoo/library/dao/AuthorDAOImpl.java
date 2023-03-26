@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class AuthorDAOImpl implements AuthorDAO{
+
     @Override
     public Optional<Author> findAuthorById(int authorId, Connection connection) throws SQLException {
         try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindById.QUERY)) {
