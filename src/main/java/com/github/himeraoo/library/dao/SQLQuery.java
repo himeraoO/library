@@ -127,6 +127,6 @@ public enum SQLQuery {
     String QUERY;
 
     SQLQuery(String QUERY) {
-        QUERY = QUERY;
+        this.QUERY = QUERY;
     }
 }

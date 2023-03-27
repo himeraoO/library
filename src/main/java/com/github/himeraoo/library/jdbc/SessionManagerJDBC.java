@@ -12,7 +12,7 @@ public class SessionManagerJDBC implements SessionManager {
     private final String password;
 
     public SessionManagerJDBC() {
-        url = "jdbc:mysql://localhost:3306/library_db";
+        url = "jdbc:mysql://localhost:3306/library_db?characterEncoding=UTF-8";
         username = "root";
         password = "1234598760";
         try {
@@ -33,6 +33,7 @@ public class SessionManagerJDBC implements SessionManager {
 
     @Override
     public void startTransaction() {
+        checkConnection();
         try{
             connection.setAutoCommit(false);
         } catch (SQLException e) {
@@ -42,6 +43,7 @@ public class SessionManagerJDBC implements SessionManager {
 
     @Override
     public void finishTransaction() {
+        checkConnection();
         try{
             connection.setAutoCommit(true);
         } catch (SQLException e) {

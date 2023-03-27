@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class Genre {
     private int id;
-    private String name;
+    private String name = "";
 
     public Genre() {
     }

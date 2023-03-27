@@ -1,13 +1,14 @@
 package com.github.himeraoo.library.models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class Book {
     private int id;
-    private String title;
-    private Genre genre;
-    private List<Author> authorList;
+    private String title = "";
+    private Genre genre = new Genre();
+    private List<Author> authorList = new ArrayList<>();
 
     public Book() {
     }

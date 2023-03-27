@@ -15,10 +15,12 @@ public class BookDAOImpl implements BookDAO {
     public Optional<Book> findBookById(int bookId, Connection connection) throws SQLException {
         try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindById.QUERY)) {
             pst.setInt(1, bookId);
-            Book dbBook = new Book();
-            List<Author> authors = new ArrayList<>();
-            Genre genre = new Genre();
+            Book book = null;
+
             try (ResultSet rs = pst.executeQuery()) {
+                Book dbBook = new Book();
+                Genre genre = new Genre();
+                List<Author> authors = new ArrayList<>();
                 while (rs.next()) {
                     dbBook.setId(Integer.parseInt(rs.getString("bid")));
                     dbBook.setTitle(rs.getString("btitle"));
@@ -30,12 +32,16 @@ public class BookDAOImpl implements BookDAO {
                     author.setId(Integer.parseInt(rs.getString("aid")));
                     author.setName(rs.getString("aname"));
                     author.setSurname(rs.getString("asurname"));
+                    author.setBookList(new ArrayList<>());
                     authors.add(author);
                 }
+                dbBook.setGenre(genre);
+                dbBook.setAuthorList(authors);
+                if(dbBook.getId() != 0){
+                    book = dbBook;
+                }
             }
-            dbBook.setGenre(genre);
-            dbBook.setAuthorList(authors);
-            return Optional.ofNullable(dbBook);
+            return Optional.ofNullable(book);
         }
     }
 
@@ -58,6 +64,7 @@ public class BookDAOImpl implements BookDAO {
                     author.setId(Integer.parseInt(rs.getString("aid")));
                     author.setName(rs.getString("aname"));
                     author.setSurname(rs.getString("asurname"));
+                    author.setBookList(new ArrayList<>());
 
                     if (integerBookHashMap.containsKey(dbBook.getId())) {
                         integerBookHashMap.get(dbBook.getId()).getAuthorList().add(author);
@@ -78,7 +85,7 @@ public class BookDAOImpl implements BookDAO {
     @Override
     public int saveBook(Book book, Connection connection) throws SQLException {
 
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookSave.QUERY, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookSave.QUERY, Statement.RETURN_GENERATED_KEYS)) {
             pst.setString(1, book.getTitle());
             pst.setInt(2, book.getGenre().getId());
             pst.executeUpdate();
@@ -93,7 +100,7 @@ public class BookDAOImpl implements BookDAO {
     @Override
     public int updatedBook(Book book, Connection connection) throws SQLException {
         int rowsUpdated;
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookUpdateById.QUERY)) {
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookUpdateById.QUERY)) {
 
             pst.setString(1, book.getTitle());
             pst.setInt(2, book.getId());
@@ -106,7 +113,7 @@ public class BookDAOImpl implements BookDAO {
     @Override
     public int deleteBook(int bookId, Connection connection) throws SQLException {
         int rowsUpdated;
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookDeleteById.QUERY)) {
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookDeleteById.QUERY)) {
             pst.setInt(1, bookId);
 
             rowsUpdated = pst.executeUpdate();

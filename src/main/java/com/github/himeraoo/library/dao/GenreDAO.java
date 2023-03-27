@@ -18,7 +18,7 @@ public interface GenreDAO {
 
     int deleteGenre(int genreId, Connection connection) throws SQLException;
 
-    void checkAddGenre(Genre genre, Connection connection) throws SQLException;
+    int checkAddGenre(Genre genre, Connection connection) throws SQLException;
 
-    void checkAndAddGenreListFromBookList(List<Book> bookList, Connection connection) throws SQLException;
+    List<Integer> checkAndAddGenreListFromBookList(List<Book> bookList, Connection connection) throws SQLException;
 }

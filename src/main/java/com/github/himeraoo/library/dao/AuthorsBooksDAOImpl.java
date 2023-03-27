@@ -79,12 +79,13 @@ public class AuthorsBooksDAOImpl implements AuthorsBooksDAO{
 
     @Override
     public void removeRelationAuthorBook(int bookId, Connection connection, List<Author> forRemoveRelation) throws SQLException {
-        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_RemoveRelationAuthorsBooks.QUERY)) {
-
-            for (Author author : forRemoveRelation) {
-                pst.setInt(1, author.getId());
-                pst.setInt(2, bookId);
-                pst.executeUpdate();
+        if(!forRemoveRelation.isEmpty()) {
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_RemoveRelationAuthorsBooks.QUERY)) {
+                for (Author author : forRemoveRelation) {
+                    pst.setInt(1, author.getId());
+                    pst.setInt(2, bookId);
+                    pst.executeUpdate();
+                }
             }
         }
     }
@@ -113,7 +114,7 @@ public class AuthorsBooksDAOImpl implements AuthorsBooksDAO{
             //книги с которыми надо удалить связи
             List<Book> forRemoveRelation = listBookFromBD.stream().filter(i -> !commonElements.contains(i)).collect(Collectors.toList());
             //добавление недостающих жанров
-            genreDAO.checkAndAddGenreListFromBookList(bookList, connection);
+            List<Integer> listGenreAdded = genreDAO.checkAndAddGenreListFromBookList(bookList, connection);
             //добавление новых книг
             addBookList(connection, forAdded);
             //добавление связей
@@ -176,11 +177,13 @@ public class AuthorsBooksDAOImpl implements AuthorsBooksDAO{
 
     @Override
     public void removeRelationBookAuthor(int author_id, Connection connection, List<Book> forRemoveRelation) throws SQLException {
-        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_RemoveRelationAuthorsBooks.QUERY)) {
-            for (Book book : forRemoveRelation) {
-                pst.setInt(1, author_id);
-                pst.setInt(2, book.getId());
-                pst.executeUpdate();
+        if(!forRemoveRelation.isEmpty()) {
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_RemoveRelationAuthorsBooks.QUERY)) {
+                for (Book book : forRemoveRelation) {
+                    pst.setInt(1, author_id);
+                    pst.setInt(2, book.getId());
+                    pst.executeUpdate();
+                }
             }
         }
     }

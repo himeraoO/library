@@ -1,8 +1,14 @@
 package com.github.himeraoo.library.servlets;
 
+import com.github.himeraoo.library.dao.*;
 import com.github.himeraoo.library.repository.AuthorRepository;
 import com.github.himeraoo.library.jdbc.SessionManager;
 import com.github.himeraoo.library.jdbc.SessionManagerJDBC;
+import com.github.himeraoo.library.repository.AuthorRepositoryImpl;
+import com.github.himeraoo.library.repository.BookRepository;
+import com.github.himeraoo.library.repository.BookRepositoryImpl;
+import com.github.himeraoo.library.service.AuthorService;
+import com.github.himeraoo.library.service.AuthorServiceImpl;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -14,6 +20,8 @@ public class ContextListener implements ServletContextListener {
 
     private SessionManager sessionManager;
     private AuthorRepository authorRepository;
+    private AuthorService authorService;
+    private BookRepository bookRepository;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -21,10 +29,20 @@ public class ContextListener implements ServletContextListener {
         final ServletContext servletContext = servletContextEvent.getServletContext();
 
         sessionManager = new SessionManagerJDBC();
-//        authorRepository = new AuthorRepositoryImpl(sessionManager, authorDAO);
+
+        AuthorDAO authorDAO = new AuthorDAOImpl();
+        GenreDAO genreDAO = new GenreDAOImpl();
+        BookDAO bookDAO = new BookDAOImpl();
+        AuthorsBooksDAO authorsBooksDAO = new AuthorsBooksDAOImpl(authorDAO, bookDAO, genreDAO);
+        authorRepository = new AuthorRepositoryImpl(sessionManager, authorDAO, genreDAO, bookDAO);
+        bookRepository = new BookRepositoryImpl(sessionManager, bookDAO, genreDAO, authorsBooksDAO);
+
+        authorService = new AuthorServiceImpl(authorRepository);
 
         servletContext.setAttribute("JDBCSession", sessionManager);
-//        servletContext.setAttribute("authorDao", authorRepository);
+        servletContext.setAttribute("authorRepository", authorRepository);
+        servletContext.setAttribute("authorService", authorService);
+        servletContext.setAttribute("bookRepository", bookRepository);
     }
 
     @Override

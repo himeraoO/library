@@ -16,9 +16,11 @@ public class AuthorDAOImpl implements AuthorDAO{
     public Optional<Author> findAuthorById(int authorId, Connection connection) throws SQLException {
         try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindById.QUERY)) {
             pst.setInt(1, authorId);
-            Author dbAuthor = new Author();
-            List<Book> books = new ArrayList<>();
+             Author author = null;
+
             try (ResultSet rs = pst.executeQuery()) {
+                Author dbAuthor = new Author();
+                List<Book> books = new ArrayList<>();
                 while (rs.next()) {
                     dbAuthor.setId(Integer.parseInt(rs.getString("aid")));
                     dbAuthor.setName(rs.getString("aname"));
@@ -27,6 +29,7 @@ public class AuthorDAOImpl implements AuthorDAO{
                     Book book = new Book();
                     book.setId(Integer.parseInt(rs.getString("bid")));
                     book.setTitle(rs.getString("btitle"));
+                    book.setAuthorList(new ArrayList<>());
 
                     Genre genre = new Genre();
                     genre.setId((Integer.parseInt(rs.getString("gid"))));
@@ -35,9 +38,12 @@ public class AuthorDAOImpl implements AuthorDAO{
                     book.setGenre(genre);
                     books.add(book);
                 }
+                dbAuthor.setBookList(books);
+                if(dbAuthor.getId() != 0){
+                    author = dbAuthor;
+                }
             }
-            dbAuthor.setBookList(books);
-            return Optional.ofNullable(dbAuthor);
+            return Optional.ofNullable(author);
         }
     }
 
@@ -56,6 +62,7 @@ public class AuthorDAOImpl implements AuthorDAO{
                     Book book = new Book();
                     book.setId(Integer.parseInt(rs.getString("bid")));
                     book.setTitle(rs.getString("btitle"));
+                    book.setAuthorList(new ArrayList<>());
 
                     Genre genre = new Genre();
                     genre.setId((Integer.parseInt(rs.getString("gid"))));
@@ -115,5 +122,53 @@ public class AuthorDAOImpl implements AuthorDAO{
             rowsUpdated = pst.executeUpdate();
         }
         return rowsUpdated;
+    }
+
+    @Override
+    public List<Book> getBookListFromBDByAuthorId(int authorId, Connection connection) throws SQLException {
+        List<Book> listBookFromBD = new ArrayList<>();
+
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AllBookFindByAuthorId.QUERY)) {
+            pst.setInt(1, authorId);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Book book = new Book();
+                    book.setId(Integer.parseInt(rs.getString("bid")));
+                    book.setTitle(rs.getString("btitle"));
+
+                    Genre genre = new Genre();
+                    genre.setId(Integer.parseInt(rs.getString("gid")));
+                    genre.setName(rs.getString("gname"));
+
+                    book.setGenre(genre);
+
+                    listBookFromBD.add(book);
+                }
+            }
+        }
+        return listBookFromBD;
+    }
+
+    @Override
+    public void removeRelationBookAuthor(int author_id, Connection connection, List<Book> forRemoveRelation) throws SQLException {
+        if(!forRemoveRelation.isEmpty()) {
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_RemoveRelationAuthorsBooks.QUERY)) {
+                for (Book book : forRemoveRelation) {
+                    pst.setInt(1, author_id);
+                    pst.setInt(2, book.getId());
+                    pst.executeUpdate();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void addRelationAuthorBook(int authorId, int bookId, Connection connection) throws SQLException {
+        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AddRelationAuthorsBooks.QUERY)) {
+                pst.setInt(1, authorId);
+                pst.setInt(2, bookId);
+                pst.executeUpdate();
+        }
     }
 }
