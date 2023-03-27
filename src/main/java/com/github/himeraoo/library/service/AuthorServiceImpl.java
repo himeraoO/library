@@ -21,7 +21,7 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public AuthorDTO findById(int authorId) throws SQLException, ElementNotFoundException{
-        AuthorDTO authorDTO = new AuthorDTO();
+        AuthorDTO authorDTO;
         Optional<Author> optionalAuthor = authorRepository.findById(authorId);
         if (optionalAuthor.isPresent()){
             Author dbAuthor = optionalAuthor.get();

@@ -120,4 +120,47 @@ public class BookDAOImpl implements BookDAO {
         }
         return rowsUpdated;
     }
+
+    @Override
+    public List<Author> getAuthorListFromBDByBookId(int bookId, Connection connection) throws SQLException {
+        List<Author> listAuthorFromBD = new ArrayList<>();
+
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AllAuthorFindByBookId.QUERY)) {
+            pst.setInt(1, bookId);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Author author = new Author();
+                    author.setId(Integer.parseInt(rs.getString("aid")));
+                    author.setName(rs.getString("aname"));
+                    author.setSurname(rs.getString("asurname"));
+                    author.setBookList(new ArrayList<>());
+                    listAuthorFromBD.add(author);
+                }
+            }
+        }
+        return listAuthorFromBD;
+    }
+
+    @Override
+    public void addRelationAuthorBook(int authorId, int bookId, Connection connection) throws SQLException {
+        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AddRelationAuthorsBooks.QUERY)) {
+            pst.setInt(1, authorId);
+            pst.setInt(2, bookId);
+            pst.executeUpdate();
+        }
+    }
+
+    @Override
+    public void removeRelationAuthorBook(int bookId, Connection connection, List<Author> forRemoveRelation) throws SQLException {
+        if(!forRemoveRelation.isEmpty()) {
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_RemoveRelationAuthorsBooks.QUERY)) {
+                for (Author author : forRemoveRelation) {
+                    pst.setInt(1, author.getId());
+                    pst.setInt(2, bookId);
+                    pst.executeUpdate();
+                }
+            }
+        }
+    }
 }

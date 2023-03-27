@@ -70,14 +70,13 @@ public class AuthorsBooksDAOImpl implements AuthorsBooksDAO{
                     author.setId(Integer.parseInt(rs.getString("aid")));
                     author.setName(rs.getString("aname"));
                     author.setSurname(rs.getString("asurname"));
+                    author.setBookList(new ArrayList<>());
                     listAuthorFromBD.add(author);
                 }
             }
         }
         return listAuthorFromBD;
-    }
-
-    @Override
+    }@Override
     public void removeRelationAuthorBook(int bookId, Connection connection, List<Author> forRemoveRelation) throws SQLException {
         if(!forRemoveRelation.isEmpty()) {
             try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_RemoveRelationAuthorsBooks.QUERY)) {
@@ -89,6 +88,8 @@ public class AuthorsBooksDAOImpl implements AuthorsBooksDAO{
             }
         }
     }
+
+
 
     @Override
     public void addAuthorList(Connection connection, List<Author> forAdded) throws SQLException {

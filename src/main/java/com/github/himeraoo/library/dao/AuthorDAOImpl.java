@@ -136,6 +136,7 @@ public class AuthorDAOImpl implements AuthorDAO{
                     Book book = new Book();
                     book.setId(Integer.parseInt(rs.getString("bid")));
                     book.setTitle(rs.getString("btitle"));
+                    book.setAuthorList(new ArrayList<>());
 
                     Genre genre = new Genre();
                     genre.setId(Integer.parseInt(rs.getString("gid")));

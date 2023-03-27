@@ -84,8 +84,8 @@ public class AuthorRepositoryImpl implements AuthorRepository {
                         genre.setId(addedGenre);
                         b.setGenre(genre);
                     }else {
-                        Genre genre1 = genreList.get(genreList.indexOf(genre));
-                        b.setGenre(genre1);
+                        Genre genreDB = genreList.get(genreList.indexOf(genre));
+                        b.setGenre(genreDB);
                     }
                     int bookId = bookDAO.saveBook(b, connection);
                     authorDAO.addRelationAuthorBook(authorId, bookId, connection);

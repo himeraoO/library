@@ -33,9 +33,8 @@ public class ContextListener implements ServletContextListener {
         AuthorDAO authorDAO = new AuthorDAOImpl();
         GenreDAO genreDAO = new GenreDAOImpl();
         BookDAO bookDAO = new BookDAOImpl();
-        AuthorsBooksDAO authorsBooksDAO = new AuthorsBooksDAOImpl(authorDAO, bookDAO, genreDAO);
         authorRepository = new AuthorRepositoryImpl(sessionManager, authorDAO, genreDAO, bookDAO);
-        bookRepository = new BookRepositoryImpl(sessionManager, bookDAO, genreDAO, authorsBooksDAO);
+        bookRepository = new BookRepositoryImpl(sessionManager, bookDAO, genreDAO, authorDAO);
 
         authorService = new AuthorServiceImpl(authorRepository);
 

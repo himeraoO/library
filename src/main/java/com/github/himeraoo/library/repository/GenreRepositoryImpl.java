@@ -99,8 +99,8 @@ public class GenreRepositoryImpl implements GenreRepository {
 
             rowsUpdated = genreDAO.deleteGenre(genreId, connection);
 
-            sessionManager.finishTransaction();
             sessionManager.commitSession();
+            sessionManager.finishTransaction();
             return rowsUpdated;
         } catch (SQLException ex) {
             sessionManager.rollbackSession();

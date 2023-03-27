@@ -1,26 +1,29 @@
 package com.github.himeraoo.library.repository;
 
-import com.github.himeraoo.library.dao.AuthorsBooksDAO;
+import com.github.himeraoo.library.dao.AuthorDAO;
 import com.github.himeraoo.library.dao.BookDAO;
 import com.github.himeraoo.library.dao.GenreDAO;
 import com.github.himeraoo.library.jdbc.SessionManager;
+import com.github.himeraoo.library.models.Author;
 import com.github.himeraoo.library.models.Book;
+import com.github.himeraoo.library.models.Genre;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BookRepositoryImpl implements BookRepository {
 
     private final SessionManager sessionManager;
     private final BookDAO bookDAO;
     private final GenreDAO genreDAO;
-    private final AuthorsBooksDAO authorsBooksDAO;
+    private final AuthorDAO authorDAO;
 
-    public BookRepositoryImpl(SessionManager sessionManager, BookDAO bookDAO, GenreDAO genreDAO, AuthorsBooksDAO authorsBooksDAO) {
+    public BookRepositoryImpl(SessionManager sessionManager, BookDAO bookDAO, GenreDAO genreDAO, AuthorDAO authorDAO) {
         this.sessionManager = sessionManager;
         this.bookDAO = bookDAO;
         this.genreDAO = genreDAO;
-        this.authorsBooksDAO = authorsBooksDAO;
+        this.authorDAO = authorDAO;
     }
 
     @Override
@@ -52,18 +55,52 @@ public class BookRepositoryImpl implements BookRepository {
         try (Connection connection = sessionManager.getCurrentSession()) {
             sessionManager.startTransaction();
 
-            genreDAO.checkAddGenre(book.getGenre(), connection);
+            List<Genre> genreList = genreDAO.findAllGenre(connection);
+
+            Genre genre = book.getGenre();
+            if (!genreList.contains(genre)){
+                int addedGenre = genreDAO.saveGenre(genre, connection);
+                genre.setId(addedGenre);
+                book.setGenre(genre);
+            }else {
+                Genre genreDB = genreList.get(genreList.indexOf(genre));
+                book.setGenre(genreDB);
+            }
 
             //сохранение книги
-            int id = bookDAO.saveBook(book, connection);
+            int bookId = bookDAO.saveBook(book, connection);
 
             //сохранение списка авторов книги, если они отсутствуют в бд
             //добавление связи между книгой и авторами
-            authorsBooksDAO.updateAndSaveAuthors(book.getId(), book.getAuthorList(), connection);
+
+            List<Author> authorList = book.getAuthorList();
+
+            //список авторов связанных с книгой
+            List<Author> listAuthorFromBD = bookDAO.getAuthorListFromBDByBookId(bookId, connection);
+
+            if (!authorList.isEmpty()){
+                //общие авторы между переданным списком и тех что в БД
+                List<Author> commonElements = authorList.stream().filter(listAuthorFromBD::contains).collect(Collectors.toList());
+                //новые авторы которые надо добавить
+                List<Author> forAdded = authorList.stream().filter(i -> !commonElements.contains(i)).collect(Collectors.toList());
+                //авторы с которыми надо удалить связи
+                List<Author> forRemoveRelation = listAuthorFromBD.stream().filter(i -> !commonElements.contains(i)).collect(Collectors.toList());
+
+                for (Author a: forAdded) {
+                    int added = authorDAO.saveAuthor(a, connection);
+                    bookDAO.addRelationAuthorBook(added, bookId, connection);
+                }
+
+                //удаление связей
+                bookDAO.removeRelationAuthorBook(bookId, connection, forRemoveRelation);
+            }else{
+                //удаление связей
+                bookDAO.removeRelationAuthorBook(bookId, connection, listAuthorFromBD);
+            }
 
             sessionManager.commitSession();
             sessionManager.finishTransaction();
-            return id;
+            return bookId;
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
             throw ex;
@@ -81,7 +118,30 @@ public class BookRepositoryImpl implements BookRepository {
 
             rowsUpdated = bookDAO.updatedBook(book, connection);
 
-            authorsBooksDAO.updateAndSaveAuthors(book.getId(), book.getAuthorList(), connection);
+            List<Author> authorList = book.getAuthorList();
+
+            //список авторов связанных с книгой
+            List<Author> listAuthorFromBD = bookDAO.getAuthorListFromBDByBookId(book.getId(), connection);
+
+            if (!authorList.isEmpty()){
+                //общие авторы между переданным списком и тех что в БД
+                List<Author> commonElements = authorList.stream().filter(listAuthorFromBD::contains).collect(Collectors.toList());
+                //новые авторы которые надо добавить
+                List<Author> forAdded = authorList.stream().filter(i -> !commonElements.contains(i)).collect(Collectors.toList());
+                //авторы с которыми надо удалить связи
+                List<Author> forRemoveRelation = listAuthorFromBD.stream().filter(i -> !commonElements.contains(i)).collect(Collectors.toList());
+
+                for (Author a: forAdded) {
+                    int added = authorDAO.saveAuthor(a, connection);
+                    bookDAO.addRelationAuthorBook(added, book.getId(), connection);
+                }
+
+                //удаление связей
+                bookDAO.removeRelationAuthorBook(book.getId(), connection, forRemoveRelation);
+            }else{
+                //удаление связей
+                bookDAO.removeRelationAuthorBook(book.getId(), connection, listAuthorFromBD);
+            }
 
             sessionManager.commitSession();
             sessionManager.finishTransaction();
@@ -107,12 +167,12 @@ public class BookRepositoryImpl implements BookRepository {
 
             if (optionalBook.isPresent()){
                 Book dbBook = optionalBook.get();
-                authorsBooksDAO.removeRelationAuthorBook(bookId, connection, dbBook.getAuthorList());
+                bookDAO.removeRelationAuthorBook(bookId, connection, dbBook.getAuthorList());
                 rowsUpdated = bookDAO.deleteBook(bookId, connection);
             }
 
-            sessionManager.finishTransaction();
             sessionManager.commitSession();
+            sessionManager.finishTransaction();
             return rowsUpdated;
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
