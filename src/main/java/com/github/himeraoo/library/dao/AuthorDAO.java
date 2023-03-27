@@ -23,7 +23,5 @@ public interface AuthorDAO {
 
     void removeRelationBookAuthor(int author_id, Connection connection, List<Book> forRemoveRelation) throws SQLException;
 
-//    void addRelationAuthorBook(int authorId, Connection connection, List<Book> forAdded) throws SQLException;
-
     void addRelationAuthorBook(int authorId, int bookId, Connection connection) throws SQLException;
 }
