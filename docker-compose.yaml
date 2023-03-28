@@ -1,0 +1,20 @@
+version: '3.1'
+
+services:
+  lybrary-db-dev:
+                  image: mysql
+                  restart: always
+                  environment:
+                    MYSQL_DATABASE: 'dev_lybrary_db'
+                    MYSQL_USER: 'dev_lybrary_db_user'
+                    MYSQL_PASSWORD: 'dev_lybrary_db_password'
+                    MYSQL_ROOT_PASSWORD: 'root'
+                  ports:
+                    # <Port exposed> : < MySQL Port running inside container>
+                    - '3307:3306'
+                  expose:
+                    # Opens port 3307 on the container
+                    - '3307'
+
+                  command: --character-set-server=utf8 --collation-server=utf8_general_ci
+                  docker exec -i mysql lybrary-db-dev < C:/TEMP/init.sql
