@@ -11,13 +11,14 @@ public class SessionManagerJDBC implements SessionManager {
     private final String username;
     private final String password;
 
-    public SessionManagerJDBC(String url, String username, String password) {
-        this.url = url;
-        this.username = username;
-        this.password = password;
+    public SessionManagerJDBC(String urlProp, String usernameProp, String passwordProp, String driver) {
+
+        this.url = urlProp;
+        this.username = usernameProp;
+        this.password = passwordProp;
 
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName(driver);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }

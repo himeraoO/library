@@ -26,8 +26,7 @@ public class GenreServiceImpl implements GenreService {
         if (optionalGenre.isPresent()){
             Genre dbGenre = optionalGenre.get();
             genreDTO = new GenreDTO(dbGenre.getId(), dbGenre.getName());
-        }
-        else {
+        } else {
             throw new ElementNotFoundException("Элемент с id  = " + genreId + " не найден.");
         }
         return genreDTO;

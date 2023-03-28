@@ -88,8 +88,8 @@ public enum SQLQuery {
             "on a.id=ab.author_id"),
     QUERY_BookUpdateById(
             "update book " +
-            "set title = ? " +
-            "set genre_id = ? " +
+            "set title = ?, " +
+            "genre_id = ? " +
             "where id = ?"),
     QUERY_BookDeleteById(
             "delete from book " +

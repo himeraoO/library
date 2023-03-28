@@ -109,12 +109,24 @@ public class BookRepositoryImpl implements BookRepository {
 
     @Override
     public int update(Book book) throws SQLException {
-        int rowsUpdated = 0;
+
 
         sessionManager.beginSession();
 
         try (Connection connection = sessionManager.getCurrentSession()) {
             sessionManager.startTransaction();
+            int rowsUpdated = 0;
+            List<Genre> genreList = genreDAO.findAllGenre(connection);
+
+            Genre genre = book.getGenre();
+            if (!genreList.contains(genre)){
+                int addedGenre = genreDAO.saveGenre(genre, connection);
+                genre.setId(addedGenre);
+                book.setGenre(genre);
+            }else {
+                Genre genreDB = genreList.get(genreList.indexOf(genre));
+                book.setGenre(genreDB);
+            }
 
             rowsUpdated = bookDAO.updatedBook(book, connection);
 
@@ -133,7 +145,9 @@ public class BookRepositoryImpl implements BookRepository {
 
                 for (Author a: forAdded) {
                     int added = authorDAO.saveAuthor(a, connection);
-                    bookDAO.addRelationAuthorBook(added, book.getId(), connection);
+                    if(added != 0) {
+                        bookDAO.addRelationAuthorBook(added, book.getId(), connection);
+                    }
                 }
 
                 //удаление связей

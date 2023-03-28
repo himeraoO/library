@@ -5,12 +5,14 @@ import com.github.himeraoo.library.repository.*;
 import com.github.himeraoo.library.jdbc.SessionManager;
 import com.github.himeraoo.library.jdbc.SessionManagerJDBC;
 import com.github.himeraoo.library.service.*;
-import com.github.himeraoo.library.util.PropertiesUtil;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 @WebListener
 public class ContextListener implements ServletContextListener {
@@ -25,10 +27,20 @@ public class ContextListener implements ServletContextListener {
 
         final ServletContext servletContext = servletContextEvent.getServletContext();
 
+        InputStream inStream = servletContext.getResourceAsStream("/WEB-INF/resources/app.properties");
+
+        Properties properties = new Properties();
+
+        try {
+            properties.load(inStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         SessionManager sessionManager = new SessionManagerJDBC(
-                PropertiesUtil.getProperty("dbUrl"),
-                PropertiesUtil.getProperty("dbUsername"),
-                PropertiesUtil.getProperty("dbPassword")
+                properties.getProperty("dbUrl"),
+                properties.getProperty("dbUsername"),
+                properties.getProperty("dbPassword"),
+                properties.getProperty("dbDriver")
         );
 
         AuthorDAO authorDAO = new AuthorDAOImpl();

@@ -18,10 +18,10 @@ public class GenreDAOImpl implements GenreDAO {
 
             try (ResultSet rs = pst.executeQuery()) {
                 Genre dbGenre = new Genre();
-                rs.next();
-                dbGenre.setId((Integer.parseInt(rs.getString("id"))));
-                dbGenre.setName((rs.getString("name")));
-
+                while (rs.next()) {
+                    dbGenre.setId((Integer.parseInt(rs.getString("id"))));
+                    dbGenre.setName((rs.getString("name")));
+                }
                 if(dbGenre.getId() != 0){
                     genre = dbGenre;
                 }

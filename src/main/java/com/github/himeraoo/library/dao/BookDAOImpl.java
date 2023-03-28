@@ -103,7 +103,8 @@ public class BookDAOImpl implements BookDAO {
         try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookUpdateById.QUERY)) {
 
             pst.setString(1, book.getTitle());
-            pst.setInt(2, book.getId());
+            pst.setInt(2, book.getGenre().getId());
+            pst.setInt(3, book.getId());
 
             rowsUpdated = pst.executeUpdate();
         }
