@@ -1,6 +1,5 @@
 package com.github.himeraoo.library.dao;
 
-import com.github.himeraoo.library.models.Book;
 import com.github.himeraoo.library.models.Genre;
 
 import java.sql.*;
@@ -17,8 +16,4 @@ public interface GenreDAO {
     int updatedGenre(Genre genre, Connection connection) throws SQLException;
 
     int deleteGenre(int genreId, Connection connection) throws SQLException;
-
-    int checkAddGenre(Genre genre, Connection connection) throws SQLException;
-
-    List<Integer> checkAndAddGenreListFromBookList(List<Book> bookList, Connection connection) throws SQLException;
 }

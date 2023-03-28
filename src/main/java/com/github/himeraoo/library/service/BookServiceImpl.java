@@ -1,10 +1,8 @@
 package com.github.himeraoo.library.service;
 
-import com.github.himeraoo.library.dto.AuthorDTO;
 import com.github.himeraoo.library.dto.BookDTO;
 import com.github.himeraoo.library.exception.ElementNotAddedException;
 import com.github.himeraoo.library.exception.ElementNotFoundException;
-import com.github.himeraoo.library.models.Author;
 import com.github.himeraoo.library.models.Book;
 import com.github.himeraoo.library.repository.BookRepository;
 

@@ -1,10 +1,10 @@
 package com.github.himeraoo.library.servlets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.himeraoo.library.dto.AuthorDTO;
+import com.github.himeraoo.library.dto.GenreDTO;
 import com.github.himeraoo.library.exception.ElementNotAddedException;
 import com.github.himeraoo.library.exception.ElementNotFoundException;
-import com.github.himeraoo.library.service.AuthorService;
+import com.github.himeraoo.library.service.GenreService;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,14 +17,14 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@WebServlet("/author/*")
-public class AuthorServlet extends HttpServlet {
+@WebServlet("/genre/*")
+public class GenreRESTServlet extends HttpServlet {
 
-    AuthorService authorService;
+    GenreService genreService;
 
     public void init() {
-        final Object authorService = getServletContext().getAttribute("authorService");
-        this.authorService = (AuthorService) authorService;
+        final Object genreService = getServletContext().getAttribute("genreService");
+        this.genreService = (GenreService) genreService;
     }
 
     @Override
@@ -36,10 +36,10 @@ public class AuthorServlet extends HttpServlet {
         ObjectMapper mapper = new ObjectMapper();
         String json = "";
 
-        if (requestPath.matches("^/author/$")) {
+        if (requestPath.matches("^/genre/$")) {
             try {
-                List<AuthorDTO> allAuthorDTOs = authorService.findAll();
-                json = mapper.writeValueAsString(allAuthorDTOs);
+                List<GenreDTO> allGenreDTOs = genreService.findAll();
+                json = mapper.writeValueAsString(allGenreDTOs);
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
                 resp.getWriter().write(json);
@@ -54,13 +54,13 @@ public class AuthorServlet extends HttpServlet {
             }
         }
 
-        if (requestPath.matches("^/author/\\d+$")) {
+        if (requestPath.matches("^/genre/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String authorIdParam = parts[2];
+            String genreIdParam = parts[2];
 
             try {
-                AuthorDTO authorDTO = authorService.findById(Integer.parseInt(authorIdParam));
-                json = mapper.writeValueAsString(authorDTO);
+                GenreDTO genreDTO = genreService.findById(Integer.parseInt(genreIdParam));
+                json = mapper.writeValueAsString(genreDTO);
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
                 resp.getWriter().write(json);
@@ -70,7 +70,7 @@ public class AuthorServlet extends HttpServlet {
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
-                out.write("Не найдено авторов с таким ID=" + authorIdParam);
+                out.write("Не найдено жанров с таким ID=" + genreIdParam);
                 resp.setStatus(404);
             }
         }
@@ -82,11 +82,11 @@ public class AuthorServlet extends HttpServlet {
         String requestPath = req.getRequestURI();
         req.setCharacterEncoding("UTF-8");
 
-        if (requestPath.matches("^/author/\\d+$")) {
+        if (requestPath.matches("^/genre/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String authorIdParam = parts[2];
+            String genreIdParam = parts[2];
             try {
-                int del = authorService.deleteById(Integer.parseInt(authorIdParam));
+                int del = genreService.deleteById(Integer.parseInt(genreIdParam));
 
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
@@ -99,7 +99,7 @@ public class AuthorServlet extends HttpServlet {
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
-                out.write("Не найдено авторов с таким ID=" + authorIdParam);
+                out.write("Не найдено жанров с таким ID=" + genreIdParam);
                 resp.setStatus(404);
             }
         }
@@ -113,14 +113,14 @@ public class AuthorServlet extends HttpServlet {
         ObjectMapper mapper = new ObjectMapper();
         String json = req.getReader().lines().collect(Collectors.joining());
 
-        AuthorDTO authorDTO = mapper.readValue(json, AuthorDTO.class);
+        GenreDTO genreDTO = mapper.readValue(json, GenreDTO.class);
 
-        if (requestPath.matches("^/author/\\d+$")) {
+        if (requestPath.matches("^/genre/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String authorIdParam = parts[2];
+            String genreIdParam = parts[2];
             try {
-                authorDTO.setId(Integer.parseInt(authorIdParam));
-                int upd = authorService.update(authorDTO);
+                genreDTO.setId(Integer.parseInt(genreIdParam));
+                int upd = genreService.update(genreDTO);
 
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
@@ -133,7 +133,7 @@ public class AuthorServlet extends HttpServlet {
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
-                out.write("Ошибка обновления автора с таким ID=" + authorIdParam);
+                out.write("Ошибка обновления жанра с таким ID=" + genreIdParam);
                 resp.setStatus(404);
             }
         }
@@ -147,11 +147,11 @@ public class AuthorServlet extends HttpServlet {
         ObjectMapper mapper = new ObjectMapper();
         String json = req.getReader().lines().collect(Collectors.joining());
 
-        AuthorDTO authorDTO = mapper.readValue(json, AuthorDTO.class);
+        GenreDTO genreDTO = mapper.readValue(json, GenreDTO.class);
 
-        if (requestPath.matches("^/author/$")) {
+        if (requestPath.matches("^/genre/$")) {
             try {
-                int add = authorService.save(authorDTO);
+                int add = genreService.save(genreDTO);
 
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
@@ -164,7 +164,7 @@ public class AuthorServlet extends HttpServlet {
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
-                out.write("Ошибка добавления нового автора");
+                out.write("Ошибка добавления нового жанра");
                 resp.setStatus(404);
             }
         }

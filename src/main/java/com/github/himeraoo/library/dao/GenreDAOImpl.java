@@ -1,6 +1,5 @@
 package com.github.himeraoo.library.dao;
 
-import com.github.himeraoo.library.models.Book;
 import com.github.himeraoo.library.models.Genre;
 
 import java.sql.*;
@@ -86,26 +85,5 @@ public class GenreDAOImpl implements GenreDAO {
             rowsUpdated = pst.executeUpdate();
         }
         return rowsUpdated;
-    }
-
-    @Override
-    public int checkAddGenre(Genre genre, Connection connection) throws SQLException {
-        Optional<Genre> optionalGenre = findGenreById(genre.getId(), connection);
-        if (!optionalGenre.isPresent()){
-            return saveGenre(genre, connection);
-        }
-        return 0;
-    }
-
-    @Override
-    public List<Integer> checkAndAddGenreListFromBookList(List<Book> bookList, Connection connection) throws SQLException {
-        List<Integer> list = new ArrayList<>();
-        for (Book book:bookList) {
-            int add = checkAddGenre(book.getGenre(), connection);
-            if (add != 0){
-                list.add(add);
-            }
-        }
-        return list;
     }
 }
