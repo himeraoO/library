@@ -14,44 +14,80 @@ public class AuthorDAOImpl implements AuthorDAO{
 
     @Override
     public Optional<Author> findAuthorById(int authorId, Connection connection) throws SQLException {
-        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindById.QUERY)) {
+        Author author = null;
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindByIdWithBooks.QUERY)) {
             pst.setInt(1, authorId);
-             Author author = null;
-
             try (ResultSet rs = pst.executeQuery()) {
-                Author dbAuthor = new Author();
-                List<Book> books = new ArrayList<>();
-                while (rs.next()) {
-                    dbAuthor.setId(Integer.parseInt(rs.getString("aid")));
-                    dbAuthor.setName(rs.getString("aname"));
-                    dbAuthor.setSurname(rs.getString("asurname"));
-
-                    Book book = new Book();
-                    book.setId(Integer.parseInt(rs.getString("bid")));
-                    book.setTitle(rs.getString("btitle"));
-                    book.setAuthorList(new ArrayList<>());
-
-                    Genre genre = new Genre();
-                    genre.setId((Integer.parseInt(rs.getString("gid"))));
-                    genre.setName((rs.getString("gname")));
-
-                    book.setGenre(genre);
-                    books.add(book);
-                }
-                dbAuthor.setBookList(books);
+                Author dbAuthor = parseAuthorWithBooks(rs);
                 if(dbAuthor.getId() != 0){
                     author = dbAuthor;
                 }
             }
-            return Optional.ofNullable(author);
         }
+
+        if (author == null){
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindByIdWithoutBooks.QUERY)) {
+                pst.setInt(1, authorId);
+                try (ResultSet rs = pst.executeQuery()) {
+                    Author dbAuthor = parseAuthorWithoutBooks(rs);
+                    if(dbAuthor.getId() != 0){
+                        author = dbAuthor;
+                    }
+                }
+            }
+        }
+
+        return Optional.ofNullable(author);
+    }
+
+    private Author parseAuthorWithBooks(ResultSet rs) throws SQLException {
+        Author dbAuthor = new Author();
+        List<Book> books = new ArrayList<>();
+        while (rs.next()) {
+            dbAuthor.setId(Integer.parseInt(rs.getString("aid")));
+            dbAuthor.setName(rs.getString("aname"));
+            dbAuthor.setSurname(rs.getString("asurname"));
+
+            Book book = new Book();
+            book.setId(Integer.parseInt(rs.getString("bid")));
+            book.setTitle(rs.getString("btitle"));
+            book.setAuthorList(new ArrayList<>());
+
+            Genre genre = new Genre();
+            genre.setId((Integer.parseInt(rs.getString("gid"))));
+            genre.setName((rs.getString("gname")));
+
+            book.setGenre(genre);
+            books.add(book);
+        }
+        dbAuthor.setBookList(books);
+        return dbAuthor;
+    }
+
+    private Author parseAuthorWithoutBooks(ResultSet rs) throws SQLException {
+        Author dbAuthor = new Author();
+        while (rs.next()) {
+            dbAuthor.setId(Integer.parseInt(rs.getString("aid")));
+            dbAuthor.setName(rs.getString("aname"));
+            dbAuthor.setSurname(rs.getString("asurname"));
+        }
+        return dbAuthor;
     }
 
     @Override
     public List<Author> findAllAuthor(Connection connection) throws SQLException {
-        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindAll.QUERY)) {
-            List<Author> authorList = null;
-            HashMap<Integer, Author> integerAuthorHashMap = new HashMap<>();
+        List<Author> authorsWithBooks = getAuthorsWithBooks(connection);
+        if (!authorsWithBooks.isEmpty()){
+            return authorsWithBooks;
+        }else {
+            return getAuthorsWithoutBooks(connection);
+        }
+    }
+
+    private List<Author> getAuthorsWithBooks(Connection connection) throws SQLException {
+        HashMap<Integer, Author> integerAuthorHashMap = new HashMap<>();
+
+        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindAllWithBooks.QUERY)) {
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Author dbAuthor = new Author();
@@ -79,10 +115,30 @@ public class AuthorDAOImpl implements AuthorDAO{
                         integerAuthorHashMap.put(dbAuthor.getId(), dbAuthor);
                     }
                 }
-                authorList = new ArrayList<>(integerAuthorHashMap.values());
-                return authorList;
             }
         }
+        return new ArrayList<>(integerAuthorHashMap.values());
+    }
+
+    private List<Author> getAuthorsWithoutBooks(Connection connection) throws SQLException {
+        List<Author> authorListWithoutBook = new ArrayList<>();
+        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindAllWithoutBooks.QUERY)) {
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Author dbAuthor = parseAuthorFromResultSetWithoutBooks(rs);
+                    authorListWithoutBook.add(dbAuthor);
+                }
+            }
+        }
+        return authorListWithoutBook;
+    }
+
+    private Author parseAuthorFromResultSetWithoutBooks(ResultSet rs) throws SQLException {
+        Author dbAuthor = new Author();
+        dbAuthor.setId(Integer.parseInt(rs.getString("aid")));
+        dbAuthor.setName(rs.getString("aname"));
+        dbAuthor.setSurname(rs.getString("asurname"));
+        return dbAuthor;
     }
 
     @Override

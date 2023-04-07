@@ -21,27 +21,28 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO findById(int bookId) throws SQLException, ElementNotFoundException {
-        BookDTO bookDTO;
         Optional<Book> optionalBook = bookRepository.findById(bookId);
         if (optionalBook.isPresent()){
             Book dbBook = optionalBook.get();
-            bookDTO = new BookDTO(dbBook.getId(), dbBook.getTitle(), dbBook.getGenre(), dbBook.getAuthorList());
-        }
-        else {
+            return new BookDTO(dbBook.getId(), dbBook.getTitle(), dbBook.getGenre(), dbBook.getAuthorList());
+        } else {
             throw new ElementNotFoundException("Элемент с id  = " + bookId + " не найден.");
         }
-        return bookDTO;
     }
 
     @Override
-    public List<BookDTO> findAll() throws SQLException {
+    public List<BookDTO> findAll() throws SQLException, ElementNotFoundException {
         List<Book> bookList = bookRepository.findAll();
-        List<BookDTO> bookDTOList = new ArrayList<>();
-        for (Book b:bookList) {
-            BookDTO bookDTO = new BookDTO(b.getId(), b.getTitle(), b.getGenre(), b.getAuthorList());
-            bookDTOList.add(bookDTO);
+        if (bookList.isEmpty()){
+            throw new ElementNotFoundException("Элементы не найдены.");
+        } else {
+            List<BookDTO> bookDTOList = new ArrayList<>();
+            for (Book b:bookList) {
+                BookDTO bookDTO = new BookDTO(b.getId(), b.getTitle(), b.getGenre(), b.getAuthorList());
+                bookDTOList.add(bookDTO);
+            }
+            return bookDTOList;
         }
-        return bookDTOList;
     }
 
     @Override

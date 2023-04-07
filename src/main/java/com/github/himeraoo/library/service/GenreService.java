@@ -11,7 +11,7 @@ public interface GenreService {
 
     GenreDTO findById(int genreId) throws SQLException, ElementNotFoundException;
 
-    List<GenreDTO> findAll() throws SQLException;
+    List<GenreDTO> findAll() throws SQLException, ElementNotFoundException;
 
     int save(GenreDTO genreDTO) throws SQLException, ElementNotAddedException;
 

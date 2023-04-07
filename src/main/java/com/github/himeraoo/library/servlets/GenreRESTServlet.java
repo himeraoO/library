@@ -50,14 +50,18 @@ public class GenreRESTServlet extends HttpServlet {
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
                 out.write("Произошла неизвестная ошибка");
+                resp.setStatus(500);
+            } catch (ElementNotFoundException e){
+                e.printStackTrace();
+                resp.setContentType("text/html");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter out = resp.getWriter();
+                out.write(e.getMessage());
                 resp.setStatus(404);
             }
-        }
-
-        if (requestPath.matches("^/genre/\\d+$")) {
+        } else if (requestPath.matches("^/genre/\\d+$")) {
             String[] parts = requestPath.split("/");
             String genreIdParam = parts[2];
-
             try {
                 GenreDTO genreDTO = genreService.findById(Integer.parseInt(genreIdParam));
                 json = mapper.writeValueAsString(genreDTO);
@@ -73,6 +77,12 @@ public class GenreRESTServlet extends HttpServlet {
                 out.write("Не найдено жанров с таким ID=" + genreIdParam);
                 resp.setStatus(404);
             }
+        } else {
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("UTF-8");
+            PrintWriter out = resp.getWriter();
+            out.write("Не правильный запрос");
+            resp.setStatus(400);
         }
     }
 
@@ -167,6 +177,12 @@ public class GenreRESTServlet extends HttpServlet {
                 out.write("Ошибка добавления нового жанра");
                 resp.setStatus(404);
             }
+        } else {
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("UTF-8");
+            PrintWriter out = resp.getWriter();
+            out.write("Не правильный запрос");
+            resp.setStatus(400);
         }
     }
 }

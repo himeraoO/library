@@ -11,45 +11,86 @@ import java.util.List;
 import java.util.Optional;
 
 public class BookDAOImpl implements BookDAO {
+
     @Override
     public Optional<Book> findBookById(int bookId, Connection connection) throws SQLException {
-        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindById.QUERY)) {
+        Book book = null;
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindByIdWithAuthors.QUERY)) {
             pst.setInt(1, bookId);
-            Book book = null;
-
             try (ResultSet rs = pst.executeQuery()) {
-                Book dbBook = new Book();
-                Genre genre = new Genre();
-                List<Author> authors = new ArrayList<>();
-                while (rs.next()) {
-                    dbBook.setId(Integer.parseInt(rs.getString("bid")));
-                    dbBook.setTitle(rs.getString("btitle"));
-
-                    genre.setId((Integer.parseInt(rs.getString("gid"))));
-                    genre.setName((rs.getString("gname")));
-
-                    Author author = new Author();
-                    author.setId(Integer.parseInt(rs.getString("aid")));
-                    author.setName(rs.getString("aname"));
-                    author.setSurname(rs.getString("asurname"));
-                    author.setBookList(new ArrayList<>());
-                    authors.add(author);
-                }
-                dbBook.setGenre(genre);
-                dbBook.setAuthorList(authors);
+                Book dbBook = parseBookWithAuthors(rs);
                 if(dbBook.getId() != 0){
                     book = dbBook;
                 }
             }
-            return Optional.ofNullable(book);
         }
+
+        if (book == null){
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindByIdWithoutAuthors.QUERY)) {
+                pst.setInt(1, bookId);
+                try (ResultSet rs = pst.executeQuery()) {
+                    Book dbBook = parseBookWithoutAuthors(rs);
+                    if(dbBook.getId() != 0){
+                        book = dbBook;
+                    }
+                }
+            }
+        }
+
+        return Optional.ofNullable(book);
+    }
+
+    private Book parseBookWithAuthors(ResultSet rs) throws SQLException {
+        Book dbBook = new Book();
+        Genre genre = new Genre();
+        List<Author> authors = new ArrayList<>();
+        while (rs.next()) {
+            dbBook.setId(Integer.parseInt(rs.getString("bid")));
+            dbBook.setTitle(rs.getString("btitle"));
+
+            genre.setId((Integer.parseInt(rs.getString("gid"))));
+            genre.setName((rs.getString("gname")));
+
+            Author author = new Author();
+            author.setId(Integer.parseInt(rs.getString("aid")));
+            author.setName(rs.getString("aname"));
+            author.setSurname(rs.getString("asurname"));
+            author.setBookList(new ArrayList<>());
+            authors.add(author);
+        }
+        dbBook.setGenre(genre);
+        dbBook.setAuthorList(authors);
+        return dbBook;
+    }
+
+
+    private Book parseBookWithoutAuthors(ResultSet rs) throws SQLException {
+        Book dbBook = new Book();
+        Genre genre = new Genre();
+        while (rs.next()) {
+            dbBook.setId(Integer.parseInt(rs.getString("bid")));
+            dbBook.setTitle(rs.getString("btitle"));
+            genre.setId((Integer.parseInt(rs.getString("gid"))));
+            genre.setName((rs.getString("gname")));
+        }
+        dbBook.setGenre(genre);
+        return dbBook;
     }
 
     @Override
     public List<Book> findAllBook(Connection connection) throws SQLException {
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindAll.QUERY)) {
-            List<Book> bookList = null;
-            HashMap<Integer, Book> integerBookHashMap = new HashMap<>();
+        List<Book> booksWithAuthors = getBooksWithAuthors(connection);
+        if (!booksWithAuthors.isEmpty()){
+            return booksWithAuthors;
+        }else {
+            return getBooksWithoutAuthors(connection);
+        }
+    }
+
+    private List<Book> getBooksWithAuthors(Connection connection) throws SQLException {
+        HashMap<Integer, Book> integerBookHashMap = new HashMap<>();
+
+        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindAll_WithAuthors.QUERY)) {
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Book dbBook = new Book();
@@ -77,9 +118,34 @@ public class BookDAOImpl implements BookDAO {
                     }
                 }
             }
-            bookList = new ArrayList<>(integerBookHashMap.values());
-            return bookList;
         }
+        return new ArrayList<>(integerBookHashMap.values());
+    }
+
+    private List<Book> getBooksWithoutAuthors(Connection connection) throws SQLException {
+        List<Book> bookListWithoutAuthor = new ArrayList<>();
+        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindAll_WithoutAuthors.QUERY)) {
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Book dbBook = parseBookFromResultSetWithoutAuthors(rs);
+                    bookListWithoutAuthor.add(dbBook);
+                }
+            }
+        }
+        return bookListWithoutAuthor;
+    }
+
+    private Book parseBookFromResultSetWithoutAuthors(ResultSet rs) throws SQLException {
+        Book dbBook = new Book();
+        dbBook.setId(Integer.parseInt(rs.getString("bid")));
+        dbBook.setTitle(rs.getString("btitle"));
+
+        Genre genre = new Genre();
+        genre.setId((Integer.parseInt(rs.getString("gid"))));
+        genre.setName((rs.getString("gname")));
+
+        dbBook.setGenre(genre);
+        return dbBook;
     }
 
     @Override

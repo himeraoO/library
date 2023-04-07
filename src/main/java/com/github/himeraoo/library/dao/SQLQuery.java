@@ -1,7 +1,7 @@
 package com.github.himeraoo.library.dao;
 
 public enum SQLQuery {
-    QUERY_AuthorFindById(
+    QUERY_AuthorFindByIdWithBooks(
             "select a.id as aid, a.name as aname, a.surname as asurname, " +
             "b.id as bid, b.title as btitle, " +
             "g.id as gid, g.name as gname " +
@@ -13,7 +13,13 @@ public enum SQLQuery {
             "inner join genre as g " +
             "on b.genre_id = g.id " +
             "where a.id = ?"),
-    QUERY_AuthorFindAll(
+
+    QUERY_AuthorFindByIdWithoutBooks(
+            "select a.id as aid, a.name as aname, a.surname as asurname " +
+                    "from author as a " +
+                    "where a.id = ?"),
+
+    QUERY_AuthorFindAllWithBooks(
             "select a.id as aid, a.name as aname, a.surname as asurname, " +
             "b.id as bid, b.title as btitle, " +
             "g.id as gid, g.name as gname " +
@@ -24,6 +30,11 @@ public enum SQLQuery {
             "on b.id=ab.book_id " +
             "inner join genre as g " +
             "on b.genre_id = g.id"),
+
+    QUERY_AuthorFindAllWithoutBooks(
+            "select a.id as aid, a.name as aname, a.surname as asurname " +
+            "from author as a"),
+
     QUERY_AuthorUpdateById(
             "update author " +
             "set name = ?, surname = ? " +
@@ -63,7 +74,7 @@ public enum SQLQuery {
             "insert into authors_books (author_id, book_id) " +
             "values (?, ?)"),
 
-    QUERY_BookFindById(
+    QUERY_BookFindByIdWithAuthors(
             "select b.id as bid, b.title as btitle, " +
             "g.id as gid, g.name as gname, " +
             "a.id as aid, a.name as aname, a.surname as asurname " +
@@ -75,7 +86,16 @@ public enum SQLQuery {
             "inner join author as a " +
             "on a.id=ab.author_id " +
             "where b.id = ?"),
-    QUERY_BookFindAll(
+
+    QUERY_BookFindByIdWithoutAuthors(
+            "select b.id as bid, b.title as btitle, " +
+            "g.id as gid, g.name as gname " +
+            "from book as b " +
+            "inner join genre as g " +
+            "on b.genre_id = g.id " +
+            "where b.id = ?"),
+
+    QUERY_BookFindAll_WithAuthors(
             "select b.id as bid, b.title as btitle, " +
             "g.id as gid, g.name as gname, " +
             "a.id as aid, a.name as aname, a.surname as asurname " +
@@ -86,6 +106,12 @@ public enum SQLQuery {
             "on b.id=ab.book_id " +
             "inner join author as a " +
             "on a.id=ab.author_id"),
+    QUERY_BookFindAll_WithoutAuthors(
+            "select b.id as bid, b.title as btitle, " +
+                    "g.id as gid, g.name as gname " +
+                    "from book as b " +
+                    "inner join genre as g " +
+                    "on b.genre_id = g.id"),
     QUERY_BookUpdateById(
             "update book " +
             "set title = ?, " +

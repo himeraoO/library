@@ -50,14 +50,18 @@ public class AuthorRESTServlet extends HttpServlet {
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
                 out.write("Произошла неизвестная ошибка");
+                resp.setStatus(500);
+            } catch (ElementNotFoundException e){
+                e.printStackTrace();
+                resp.setContentType("text/html");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter out = resp.getWriter();
+                out.write(e.getMessage());
                 resp.setStatus(404);
             }
-        }
-
-        if (requestPath.matches("^/author/\\d+$")) {
+        }else if (requestPath.matches("^/author/\\d+$")) {
             String[] parts = requestPath.split("/");
             String authorIdParam = parts[2];
-
             try {
                 AuthorDTO authorDTO = authorService.findById(Integer.parseInt(authorIdParam));
                 json = mapper.writeValueAsString(authorDTO);
@@ -73,6 +77,12 @@ public class AuthorRESTServlet extends HttpServlet {
                 out.write("Не найдено авторов с таким ID=" + authorIdParam);
                 resp.setStatus(404);
             }
+        } else {
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("UTF-8");
+            PrintWriter out = resp.getWriter();
+            out.write("Не правильный запрос");
+            resp.setStatus(400);
         }
     }
 
@@ -167,6 +177,12 @@ public class AuthorRESTServlet extends HttpServlet {
                 out.write("Ошибка добавления нового автора");
                 resp.setStatus(404);
             }
+        } else {
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("UTF-8");
+            PrintWriter out = resp.getWriter();
+            out.write("Не правильный запрос");
+            resp.setStatus(400);
         }
     }
 }

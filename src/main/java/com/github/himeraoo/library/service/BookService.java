@@ -11,7 +11,7 @@ public interface BookService {
 
     BookDTO findById(int bookId) throws SQLException, ElementNotFoundException;
 
-    List<BookDTO> findAll() throws SQLException;
+    List<BookDTO> findAll() throws SQLException, ElementNotFoundException;
 
     int save(BookDTO bookDTO) throws SQLException, ElementNotAddedException;
 

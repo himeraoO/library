@@ -32,23 +32,31 @@ public class AuthorRepositoryImpl implements AuthorRepository {
     @Override
     public Optional<Author> findById(int authorId) throws SQLException {
         sessionManager.beginSession();
+
+        Optional<Author> optionalAuthor;
+
         try (Connection connection = sessionManager.getCurrentSession()) {
-            return authorDAO.findAuthorById(authorId, connection);
+            optionalAuthor = authorDAO.findAuthorById(authorId, connection);
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
             throw ex;
         }
+        return optionalAuthor;
     }
 
     @Override
     public List<Author> findAll() throws SQLException {
         sessionManager.beginSession();
+
+        List<Author> authorList;
+
         try (Connection connection = sessionManager.getCurrentSession()) {
-            return authorDAO.findAllAuthor(connection);
+            authorList = authorDAO.findAllAuthor(connection);
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
             throw ex;
         }
+        return authorList;
     }
 
     @Override

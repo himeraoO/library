@@ -21,26 +21,28 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public GenreDTO findById(int genreId) throws SQLException, ElementNotFoundException {
-        GenreDTO genreDTO;
         Optional<Genre> optionalGenre = genreRepository.findById(genreId);
         if (optionalGenre.isPresent()){
             Genre dbGenre = optionalGenre.get();
-            genreDTO = new GenreDTO(dbGenre.getId(), dbGenre.getName());
+            return new GenreDTO(dbGenre.getId(), dbGenre.getName());
         } else {
             throw new ElementNotFoundException("Элемент с id  = " + genreId + " не найден.");
         }
-        return genreDTO;
     }
 
     @Override
-    public List<GenreDTO> findAll() throws SQLException {
+    public List<GenreDTO> findAll() throws SQLException, ElementNotFoundException {
         List<Genre> genreList = genreRepository.findAll();
-        List<GenreDTO> genreDTOList = new ArrayList<>();
-        for (Genre g:genreList) {
-            GenreDTO genreDTO = new GenreDTO(g.getId(), g.getName());
-            genreDTOList.add(genreDTO);
+        if (genreList.isEmpty()){
+            throw new ElementNotFoundException("Элементы не найдены.");
+        } else {
+            List<GenreDTO> genreDTOList = new ArrayList<>();
+            for (Genre g:genreList) {
+                GenreDTO genreDTO = new GenreDTO(g.getId(), g.getName());
+                genreDTOList.add(genreDTO);
+            }
+            return genreDTOList;
         }
-        return genreDTOList;
     }
 
     @Override

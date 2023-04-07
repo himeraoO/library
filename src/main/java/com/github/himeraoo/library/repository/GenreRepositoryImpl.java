@@ -21,49 +21,52 @@ public class GenreRepositoryImpl implements GenreRepository {
 
     @Override
     public Optional<Genre> findById(int genreId) throws SQLException {
-
         sessionManager.beginSession();
 
-        try (Connection connection = sessionManager.getCurrentSession()) {
+        Optional<Genre> optionalGenre;
 
-            return genreDAO.findGenreById(genreId, connection);
+        try (Connection connection = sessionManager.getCurrentSession()) {
+            optionalGenre = genreDAO.findGenreById(genreId, connection);
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
             throw ex;
         }
+        return optionalGenre;
     }
 
     @Override
     public List<Genre> findAll() throws SQLException {
-
         sessionManager.beginSession();
 
+        List<Genre> genreList;
+
         try (Connection connection = sessionManager.getCurrentSession()) {
-
-            return genreDAO.findAllGenre(connection);
-
+            genreList = genreDAO.findAllGenre(connection);
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
             throw ex;
         }
+        return genreList;
     }
 
     @Override
     public int save(Genre genre) throws SQLException {
         sessionManager.beginSession();
 
+        int id = 0;
+
         try (Connection connection = sessionManager.getCurrentSession()) {
             sessionManager.startTransaction();
 
-            int id = genreDAO.saveGenre(genre, connection);
+            id = genreDAO.saveGenre(genre, connection);
 
             sessionManager.commitSession();
             sessionManager.finishTransaction();
-            return id;
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
             throw ex;
         }
+        return id;
     }
 
     @Override

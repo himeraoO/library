@@ -11,7 +11,7 @@ public interface AuthorService {
 
     AuthorDTO findById(int authorId) throws SQLException, ElementNotFoundException;
 
-    List<AuthorDTO> findAll() throws SQLException;
+    List<AuthorDTO> findAll() throws SQLException, ElementNotFoundException;
 
     int save(AuthorDTO authorDTO) throws SQLException, ElementNotAddedException;
 

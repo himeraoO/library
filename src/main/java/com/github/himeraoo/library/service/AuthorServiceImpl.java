@@ -21,27 +21,28 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public AuthorDTO findById(int authorId) throws SQLException, ElementNotFoundException{
-        AuthorDTO authorDTO;
         Optional<Author> optionalAuthor = authorRepository.findById(authorId);
         if (optionalAuthor.isPresent()){
             Author dbAuthor = optionalAuthor.get();
-            authorDTO = new AuthorDTO(dbAuthor.getId(), dbAuthor.getName(), dbAuthor.getSurname(), dbAuthor.getBookList());
-        }
-        else {
+            return new AuthorDTO(dbAuthor.getId(), dbAuthor.getName(), dbAuthor.getSurname(), dbAuthor.getBookList());
+        } else {
             throw new ElementNotFoundException("Элемент с id  = " + authorId + " не найден.");
         }
-        return authorDTO;
     }
 
     @Override
-    public List<AuthorDTO> findAll() throws SQLException {
+    public List<AuthorDTO> findAll() throws SQLException, ElementNotFoundException {
         List<Author> authorList = authorRepository.findAll();
-        List<AuthorDTO> authorDTOList = new ArrayList<>();
-        for (Author a:authorList) {
-            AuthorDTO authorDTO = new AuthorDTO(a.getId(), a.getName(), a.getSurname(), a.getBookList());
-            authorDTOList.add(authorDTO);
+        if (authorList.isEmpty()){
+            throw new ElementNotFoundException("Элементы не найдены.");
+        } else {
+            List<AuthorDTO> authorDTOList = new ArrayList<>();
+            for (Author a:authorList) {
+                AuthorDTO authorDTO = new AuthorDTO(a.getId(), a.getName(), a.getSurname(), a.getBookList());
+                authorDTOList.add(authorDTO);
+            }
+            return authorDTOList;
         }
-        return authorDTOList;
     }
 
     @Override

@@ -50,14 +50,18 @@ public class BookRESTServlet extends HttpServlet {
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
                 out.write("Произошла неизвестная ошибка");
+                resp.setStatus(500);
+            } catch (ElementNotFoundException e){
+                e.printStackTrace();
+                resp.setContentType("text/html");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter out = resp.getWriter();
+                out.write(e.getMessage());
                 resp.setStatus(404);
             }
-        }
-
-        if (requestPath.matches("^/book/\\d+$")) {
+        } else if (requestPath.matches("^/book/\\d+$")) {
             String[] parts = requestPath.split("/");
             String bookIdParam = parts[2];
-
             try {
                 BookDTO bookDTO = bookService.findById(Integer.parseInt(bookIdParam));
                 json = mapper.writeValueAsString(bookDTO);
@@ -73,6 +77,12 @@ public class BookRESTServlet extends HttpServlet {
                 out.write("Не найдено книг с таким ID=" + bookIdParam);
                 resp.setStatus(404);
             }
+        } else {
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("UTF-8");
+            PrintWriter out = resp.getWriter();
+            out.write("Не правильный запрос");
+            resp.setStatus(400);
         }
     }
 
@@ -167,6 +177,12 @@ public class BookRESTServlet extends HttpServlet {
                 out.write("Ошибка добавления новой книги");
                 resp.setStatus(404);
             }
+        } else {
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("UTF-8");
+            PrintWriter out = resp.getWriter();
+            out.write("Не правильный запрос");
+            resp.setStatus(400);
         }
     }
 }

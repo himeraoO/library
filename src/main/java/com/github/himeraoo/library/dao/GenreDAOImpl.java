@@ -11,11 +11,9 @@ public class GenreDAOImpl implements GenreDAO {
 
     @Override
     public Optional<Genre> findGenreById(int genreId, Connection connection) throws SQLException {
+        Genre genre = null;
         try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreFindById.QUERY)) {
             pst.setInt(1, genreId);
-
-             Genre genre = null;
-
             try (ResultSet rs = pst.executeQuery()) {
                 Genre dbGenre = new Genre();
                 while (rs.next()) {
@@ -26,28 +24,24 @@ public class GenreDAOImpl implements GenreDAO {
                     genre = dbGenre;
                 }
             }
-            return Optional.ofNullable(genre);
         }
+        return Optional.ofNullable(genre);
     }
 
     @Override
     public List<Genre> findAllGenre(Connection connection) throws SQLException {
+        List<Genre> genreList = new ArrayList<>();
         try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreFindAll.QUERY)) {
-
-            List<Genre> genreList = new ArrayList<>();
-
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-
                     Genre dbGenre = new Genre();
                     dbGenre.setId((Integer.parseInt(rs.getString("id"))));
                     dbGenre.setName((rs.getString("name")));
-
                     genreList.add(dbGenre);
                 }
             }
-            return genreList;
         }
+        return genreList;
     }
 
     @Override

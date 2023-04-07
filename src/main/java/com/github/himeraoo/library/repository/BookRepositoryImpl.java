@@ -29,28 +29,38 @@ public class BookRepositoryImpl implements BookRepository {
     @Override
     public Optional<Book> findById(int bookId) throws SQLException {
         sessionManager.beginSession();
+
+        Optional<Book> optionalBook;
+
         try (Connection connection = sessionManager.getCurrentSession()) {
-            return bookDAO.findBookById(bookId, connection);
+            optionalBook = bookDAO.findBookById(bookId, connection);
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
             throw ex;
         }
+        return optionalBook;
     }
 
     @Override
     public List<Book> findAll() throws SQLException {
         sessionManager.beginSession();
+
+        List<Book> bookList;
+
         try (Connection connection = sessionManager.getCurrentSession()) {
-            return bookDAO.findAllBook(connection);
+            bookList = bookDAO.findAllBook(connection);
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
             throw ex;
         }
+        return bookList;
     }
 
     @Override
     public int save(Book book) throws SQLException {
         sessionManager.beginSession();
+
+        int bookId = 0;
 
         try (Connection connection = sessionManager.getCurrentSession()) {
             sessionManager.startTransaction();
@@ -68,7 +78,7 @@ public class BookRepositoryImpl implements BookRepository {
             }
 
             //сохранение книги
-            int bookId = bookDAO.saveBook(book, connection);
+            bookId = bookDAO.saveBook(book, connection);
 
             //сохранение списка авторов книги, если они отсутствуют в бд
             //добавление связи между книгой и авторами
@@ -100,11 +110,11 @@ public class BookRepositoryImpl implements BookRepository {
 
             sessionManager.commitSession();
             sessionManager.finishTransaction();
-            return bookId;
         } catch (SQLException ex) {
             sessionManager.rollbackSession();
             throw ex;
         }
+        return bookId;
     }
 
     @Override
