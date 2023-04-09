@@ -2,8 +2,10 @@ package com.github.himeraoo.library.servlets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.himeraoo.library.dto.GenreDTO;
-import com.github.himeraoo.library.exception.ElementNotAddedException;
-import com.github.himeraoo.library.exception.ElementNotFoundException;
+import com.github.himeraoo.library.exception.ElementHasNotAddedException;
+import com.github.himeraoo.library.exception.ElementHasNotDeletedException;
+import com.github.himeraoo.library.exception.ElementHasNotFoundException;
+import com.github.himeraoo.library.exception.ElementHasNotUpdatedException;
 import com.github.himeraoo.library.service.GenreService;
 
 import javax.servlet.ServletException;
@@ -44,20 +46,20 @@ public class GenreRESTServlet extends HttpServlet {
                 resp.setCharacterEncoding("UTF-8");
                 resp.getWriter().write(json);
                 resp.setStatus(200);
-            } catch (SQLException e) {
-                e.printStackTrace();
-                resp.setContentType("text/html");
-                resp.setCharacterEncoding("UTF-8");
-                PrintWriter out = resp.getWriter();
-                out.write("Произошла неизвестная ошибка");
-                resp.setStatus(500);
-            } catch (ElementNotFoundException e){
+            } catch (ElementHasNotFoundException e) {
                 e.printStackTrace();
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
                 out.write(e.getMessage());
                 resp.setStatus(404);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                resp.setContentType("text/html");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter out = resp.getWriter();
+                out.write(e.getMessage());
+                resp.setStatus(500);
             }
         } else if (requestPath.matches("^/genre/\\d+$")) {
             String[] parts = requestPath.split("/");
@@ -69,19 +71,26 @@ public class GenreRESTServlet extends HttpServlet {
                 resp.setCharacterEncoding("UTF-8");
                 resp.getWriter().write(json);
                 resp.setStatus(200);
-            } catch (SQLException | ElementNotFoundException e) {
+            } catch (ElementHasNotFoundException e) {
                 e.printStackTrace();
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
-                out.write("Не найдено жанров с таким ID=" + genreIdParam);
+                out.write(e.getMessage());
                 resp.setStatus(404);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                resp.setContentType("text/html");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter out = resp.getWriter();
+                out.write(e.getMessage());
+                resp.setStatus(500);
             }
         } else {
             resp.setContentType("text/html");
             resp.setCharacterEncoding("UTF-8");
             PrintWriter out = resp.getWriter();
-            out.write("Не правильный запрос");
+            out.write("Неправильный запрос");
             resp.setStatus(400);
         }
     }
@@ -104,19 +113,39 @@ public class GenreRESTServlet extends HttpServlet {
                 out.write("Удалено записей " + del);
                 resp.setStatus(200);
 
-            } catch (SQLException | ElementNotFoundException e) {
+            } catch (ElementHasNotFoundException e) {
                 e.printStackTrace();
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
-                out.write("Не найдено жанров с таким ID=" + genreIdParam);
+                out.write(e.getMessage());
                 resp.setStatus(404);
+            } catch (ElementHasNotDeletedException e) {
+                e.printStackTrace();
+                resp.setContentType("text/html");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter out = resp.getWriter();
+                out.write(e.getMessage());
+                resp.setStatus(400);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                resp.setContentType("text/html");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter out = resp.getWriter();
+                out.write(e.getMessage());
+                resp.setStatus(500);
             }
+        } else {
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("UTF-8");
+            PrintWriter out = resp.getWriter();
+            out.write("Неправильный запрос");
+            resp.setStatus(400);
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String requestPath = req.getRequestURI();
         req.setCharacterEncoding("UTF-8");
 
@@ -138,19 +167,40 @@ public class GenreRESTServlet extends HttpServlet {
                 out.write("Обновлено записей " + upd);
                 resp.setStatus(200);
 
-            } catch (SQLException | ElementNotFoundException e) {
+            } catch (ElementHasNotFoundException e) {
                 e.printStackTrace();
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
-                out.write("Ошибка обновления жанра с таким ID=" + genreIdParam);
+                out.write(e.getMessage());
                 resp.setStatus(404);
+            } catch (ElementHasNotUpdatedException e) {
+                e.printStackTrace();
+                resp.setContentType("text/html");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter out = resp.getWriter();
+                out.write(e.getMessage());
+                resp.setStatus(400);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                resp.setContentType("text/html");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter out = resp.getWriter();
+                out.write(e.getMessage());
+                resp.setStatus(500);
             }
+        } else {
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("UTF-8");
+            PrintWriter out = resp.getWriter();
+            out.write("Неправильный запрос");
+            resp.setStatus(400);
         }
     }
 
+    //нужна проверка на добавление повторов
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String requestPath = req.getRequestURI();
         req.setCharacterEncoding("UTF-8");
 
@@ -169,19 +219,26 @@ public class GenreRESTServlet extends HttpServlet {
                 out.write("Добавлена запись с id " + add);
                 resp.setStatus(200);
 
-            } catch (SQLException | ElementNotAddedException e) {
+            } catch (ElementHasNotAddedException e) {
                 e.printStackTrace();
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF-8");
                 PrintWriter out = resp.getWriter();
-                out.write("Ошибка добавления нового жанра");
+                out.write(e.getMessage());
                 resp.setStatus(404);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                resp.setContentType("text/html");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter out = resp.getWriter();
+                out.write(e.getMessage());
+                resp.setStatus(500);
             }
         } else {
             resp.setContentType("text/html");
             resp.setCharacterEncoding("UTF-8");
             PrintWriter out = resp.getWriter();
-            out.write("Не правильный запрос");
+            out.write("Неправильный запрос");
             resp.setStatus(400);
         }
     }

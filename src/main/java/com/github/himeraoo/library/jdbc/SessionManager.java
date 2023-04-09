@@ -2,7 +2,7 @@ package com.github.himeraoo.library.jdbc;
 
 import java.sql.Connection;
 
-public interface SessionManager extends AutoCloseable{
+public interface SessionManager extends AutoCloseable {
     void beginSession();
 
     void startTransaction();

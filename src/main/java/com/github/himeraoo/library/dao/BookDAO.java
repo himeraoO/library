@@ -3,7 +3,8 @@ package com.github.himeraoo.library.dao;
 import com.github.himeraoo.library.models.Author;
 import com.github.himeraoo.library.models.Book;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,5 +23,9 @@ public interface BookDAO {
 
     void addRelationAuthorBook(int authorId, int bookId, Connection connection) throws SQLException;
 
-    void removeRelationAuthorBook(int bookId, Connection connection, List<Author> forRemoveRelation) throws SQLException;
+    void removeRelationAuthorBook(int bookId, List<Author> forRemoveRelation, Connection connection) throws SQLException;
+
+    int countBookByGenreId(int genreId, Connection connection) throws SQLException;
+
+    int countBookByTitle(String bookTitle, Connection connection) throws SQLException;
 }

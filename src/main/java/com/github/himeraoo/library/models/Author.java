@@ -74,11 +74,11 @@ public class Author {
         sb.append("id=").append(id);
         sb.append(", name='").append(name).append('\'');
         sb.append(", surename='").append(surname).append('\'');
-        if(bookList.isEmpty()){
+        if (bookList.isEmpty()) {
             sb.append(", bookList=empty");
-        }else {
+        } else {
             sb.append(", bookList=");
-            for (Book b:bookList) {
+            for (Book b : bookList) {
                 sb.append("(Book: ").append(b.getTitle()).append(", ").append(b.getGenre()).append(")").append(", ");
             }
             sb.setLength(sb.length() - 2);

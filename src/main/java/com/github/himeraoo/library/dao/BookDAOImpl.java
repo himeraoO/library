@@ -4,11 +4,16 @@ import com.github.himeraoo.library.models.Author;
 import com.github.himeraoo.library.models.Book;
 import com.github.himeraoo.library.models.Genre;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class BookDAOImpl implements BookDAO {
 
@@ -19,18 +24,18 @@ public class BookDAOImpl implements BookDAO {
             pst.setInt(1, bookId);
             try (ResultSet rs = pst.executeQuery()) {
                 Book dbBook = parseBookWithAuthors(rs);
-                if(dbBook.getId() != 0){
+                if (dbBook.getId() != 0) {
                     book = dbBook;
                 }
             }
         }
 
-        if (book == null){
+        if (book == null) {
             try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindByIdWithoutAuthors.QUERY)) {
                 pst.setInt(1, bookId);
                 try (ResultSet rs = pst.executeQuery()) {
                     Book dbBook = parseBookWithoutAuthors(rs);
-                    if(dbBook.getId() != 0){
+                    if (dbBook.getId() != 0) {
                         book = dbBook;
                     }
                 }
@@ -79,18 +84,21 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public List<Book> findAllBook(Connection connection) throws SQLException {
+        List<Book> result = new ArrayList<>();
         List<Book> booksWithAuthors = getBooksWithAuthors(connection);
-        if (!booksWithAuthors.isEmpty()){
-            return booksWithAuthors;
-        }else {
-            return getBooksWithoutAuthors(connection);
-        }
+        List<Book> booksWithoutAuthors = getBooksWithoutAuthors(connection);
+        result.addAll(booksWithAuthors);
+        result.addAll(booksWithoutAuthors
+                .stream()
+                .filter(book -> !booksWithAuthors.contains(book))
+                .collect(Collectors.toList()));
+        return result;
     }
 
     private List<Book> getBooksWithAuthors(Connection connection) throws SQLException {
         HashMap<Integer, Book> integerBookHashMap = new HashMap<>();
 
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindAll_WithAuthors.QUERY)) {
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindAll_WithAuthors.QUERY)) {
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Book dbBook = new Book();
@@ -101,19 +109,17 @@ public class BookDAOImpl implements BookDAO {
                     genre.setId((Integer.parseInt(rs.getString("gid"))));
                     genre.setName((rs.getString("gname")));
 
+                    dbBook.setGenre(genre);
+
                     Author author = new Author();
                     author.setId(Integer.parseInt(rs.getString("aid")));
                     author.setName(rs.getString("aname"));
                     author.setSurname(rs.getString("asurname"));
-                    author.setBookList(new ArrayList<>());
 
                     if (integerBookHashMap.containsKey(dbBook.getId())) {
                         integerBookHashMap.get(dbBook.getId()).getAuthorList().add(author);
                     } else {
-                        List<Author> authorList = new ArrayList<>();
-                        authorList.add(author);
-                        dbBook.setGenre(genre);
-                        dbBook.setAuthorList(authorList);
+                        dbBook.getAuthorList().add(author);
                         integerBookHashMap.put(dbBook.getId(), dbBook);
                     }
                 }
@@ -124,7 +130,7 @@ public class BookDAOImpl implements BookDAO {
 
     private List<Book> getBooksWithoutAuthors(Connection connection) throws SQLException {
         List<Book> bookListWithoutAuthor = new ArrayList<>();
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindAll_WithoutAuthors.QUERY)) {
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookFindAll_WithoutAuthors.QUERY)) {
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Book dbBook = parseBookFromResultSetWithoutAuthors(rs);
@@ -150,17 +156,19 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public int saveBook(Book book, Connection connection) throws SQLException {
-
+        int id = 0;
         try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_BookSave.QUERY, Statement.RETURN_GENERATED_KEYS)) {
             pst.setString(1, book.getTitle());
             pst.setInt(2, book.getGenre().getId());
             pst.executeUpdate();
 
             try (ResultSet rs = pst.getGeneratedKeys()) {
-                rs.next();
-                return rs.getInt(1);
+                if (rs.next()) {
+                    id = rs.getInt(1);
+                }
             }
         }
+        return id;
     }
 
     @Override
@@ -211,7 +219,7 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public void addRelationAuthorBook(int authorId, int bookId, Connection connection) throws SQLException {
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AddRelationAuthorsBooks.QUERY)) {
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AddRelationAuthorsBooks.QUERY)) {
             pst.setInt(1, authorId);
             pst.setInt(2, bookId);
             pst.executeUpdate();
@@ -219,8 +227,8 @@ public class BookDAOImpl implements BookDAO {
     }
 
     @Override
-    public void removeRelationAuthorBook(int bookId, Connection connection, List<Author> forRemoveRelation) throws SQLException {
-        if(!forRemoveRelation.isEmpty()) {
+    public void removeRelationAuthorBook(int bookId, List<Author> forRemoveRelation, Connection connection) throws SQLException {
+        if (!forRemoveRelation.isEmpty()) {
             try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_RemoveRelationAuthorsBooks.QUERY)) {
                 for (Author author : forRemoveRelation) {
                     pst.setInt(1, author.getId());
@@ -229,5 +237,33 @@ public class BookDAOImpl implements BookDAO {
                 }
             }
         }
+    }
+
+    @Override
+    public int countBookByGenreId(int genreId, Connection connection) throws SQLException {
+        int countRows = 0;
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_CountBookByGenreId.QUERY)) {
+            pst.setInt(1, genreId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    countRows = rs.getInt("Count(*)");
+                }
+            }
+        }
+        return countRows;
+    }
+
+    @Override
+    public int countBookByTitle(String bookTitle, Connection connection) throws SQLException {
+        int countRows = 0;
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_CountBookByTitle.QUERY)) {
+            pst.setString(1, bookTitle);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    countRows = rs.getInt("Count(*)");
+                }
+            }
+        }
+        return countRows;
     }
 }

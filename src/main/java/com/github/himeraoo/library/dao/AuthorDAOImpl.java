@@ -4,13 +4,18 @@ import com.github.himeraoo.library.models.Author;
 import com.github.himeraoo.library.models.Book;
 import com.github.himeraoo.library.models.Genre;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class AuthorDAOImpl implements AuthorDAO{
+public class AuthorDAOImpl implements AuthorDAO {
 
     @Override
     public Optional<Author> findAuthorById(int authorId, Connection connection) throws SQLException {
@@ -19,18 +24,18 @@ public class AuthorDAOImpl implements AuthorDAO{
             pst.setInt(1, authorId);
             try (ResultSet rs = pst.executeQuery()) {
                 Author dbAuthor = parseAuthorWithBooks(rs);
-                if(dbAuthor.getId() != 0){
+                if (dbAuthor.getId() != 0) {
                     author = dbAuthor;
                 }
             }
         }
 
-        if (author == null){
+        if (author == null) {
             try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindByIdWithoutBooks.QUERY)) {
                 pst.setInt(1, authorId);
                 try (ResultSet rs = pst.executeQuery()) {
                     Author dbAuthor = parseAuthorWithoutBooks(rs);
-                    if(dbAuthor.getId() != 0){
+                    if (dbAuthor.getId() != 0) {
                         author = dbAuthor;
                     }
                 }
@@ -76,18 +81,21 @@ public class AuthorDAOImpl implements AuthorDAO{
 
     @Override
     public List<Author> findAllAuthor(Connection connection) throws SQLException {
+        List<Author> result = new ArrayList<>();
         List<Author> authorsWithBooks = getAuthorsWithBooks(connection);
-        if (!authorsWithBooks.isEmpty()){
-            return authorsWithBooks;
-        }else {
-            return getAuthorsWithoutBooks(connection);
-        }
+        List<Author> authorsWithoutBooks = getAuthorsWithoutBooks(connection);
+        result.addAll(authorsWithBooks);
+        result.addAll(authorsWithoutBooks
+                .stream()
+                .filter(book -> !authorsWithBooks.contains(book))
+                .collect(Collectors.toList()));
+        return result;
     }
 
     private List<Author> getAuthorsWithBooks(Connection connection) throws SQLException {
         HashMap<Integer, Author> integerAuthorHashMap = new HashMap<>();
 
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindAllWithBooks.QUERY)) {
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindAllWithBooks.QUERY)) {
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Author dbAuthor = new Author();
@@ -122,7 +130,7 @@ public class AuthorDAOImpl implements AuthorDAO{
 
     private List<Author> getAuthorsWithoutBooks(Connection connection) throws SQLException {
         List<Author> authorListWithoutBook = new ArrayList<>();
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindAllWithoutBooks.QUERY)) {
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorFindAllWithoutBooks.QUERY)) {
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Author dbAuthor = parseAuthorFromResultSetWithoutBooks(rs);
@@ -143,22 +151,25 @@ public class AuthorDAOImpl implements AuthorDAO{
 
     @Override
     public int saveAuthor(Author author, Connection connection) throws SQLException {
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorSave.QUERY, Statement.RETURN_GENERATED_KEYS)) {
+        int id = 0;
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorSave.QUERY, Statement.RETURN_GENERATED_KEYS)) {
             pst.setString(1, author.getName());
             pst.setString(2, author.getSurname());
             pst.executeUpdate();
 
             try (ResultSet rs = pst.getGeneratedKeys()) {
-                rs.next();
-                return rs.getInt(1);
+                if (rs.next()) {
+                    id = rs.getInt(1);
+                }
             }
         }
+        return id;
     }
 
     @Override
     public int updatedAuthor(Author author, Connection connection) throws SQLException {
         int rowsUpdated;
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorUpdateById.QUERY)) {
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorUpdateById.QUERY)) {
 
             pst.setString(1, author.getName());
             pst.setString(2, author.getSurname());
@@ -172,7 +183,7 @@ public class AuthorDAOImpl implements AuthorDAO{
     @Override
     public int deleteAuthor(int authorId, Connection connection) throws SQLException {
         int rowsUpdated;
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorDeleteById.QUERY)) {
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AuthorDeleteById.QUERY)) {
             pst.setInt(1, authorId);
 
             rowsUpdated = pst.executeUpdate();
@@ -208,8 +219,8 @@ public class AuthorDAOImpl implements AuthorDAO{
     }
 
     @Override
-    public void removeRelationBookAuthor(int author_id, Connection connection, List<Book> forRemoveRelation) throws SQLException {
-        if(!forRemoveRelation.isEmpty()) {
+    public void removeRelationBookAuthor(int author_id, List<Book> forRemoveRelation, Connection connection) throws SQLException {
+        if (!forRemoveRelation.isEmpty()) {
             try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_RemoveRelationAuthorsBooks.QUERY)) {
                 for (Book book : forRemoveRelation) {
                     pst.setInt(1, author_id);
@@ -222,10 +233,25 @@ public class AuthorDAOImpl implements AuthorDAO{
 
     @Override
     public void addRelationAuthorBook(int authorId, int bookId, Connection connection) throws SQLException {
-        try(PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AddRelationAuthorsBooks.QUERY)) {
-                pst.setInt(1, authorId);
-                pst.setInt(2, bookId);
-                pst.executeUpdate();
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_AddRelationAuthorsBooks.QUERY)) {
+            pst.setInt(1, authorId);
+            pst.setInt(2, bookId);
+            pst.executeUpdate();
         }
+    }
+
+    @Override
+    public int countAuthorByNameAndSurname(String authorName, String authorSurname, Connection connection) throws SQLException {
+        int countRows = 0;
+        try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_CountAuthorByNameAndSurname.QUERY)) {
+            pst.setString(1, authorName);
+            pst.setString(2, authorSurname);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    countRows = rs.getInt("Count(*)");
+                }
+            }
+        }
+        return countRows;
     }
 }

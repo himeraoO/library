@@ -21,7 +21,9 @@ public interface AuthorDAO {
 
     List<Book> getBookListFromBDByAuthorId(int authorId, Connection connection) throws SQLException;
 
-    void removeRelationBookAuthor(int author_id, Connection connection, List<Book> forRemoveRelation) throws SQLException;
+    void removeRelationBookAuthor(int author_id, List<Book> forRemoveRelation, Connection connection) throws SQLException;
 
     void addRelationAuthorBook(int authorId, int bookId, Connection connection) throws SQLException;
+
+    int countAuthorByNameAndSurname(String authorName, String authorSurname, Connection connection) throws SQLException;
 }
