@@ -115,7 +115,7 @@ public class AuthorRepositoryImpl implements AuthorRepository {
                     //Добавление связей между книгой и авторами, которые уже есть в БД
                     for (Book b : commonElements) {
                         int bookId = listBooksFromDB.get(listBooksFromDB.indexOf(b)).getId();
-                        bookDAO.addRelationAuthorBook(authorId, bookId, connection);
+                        authorDAO.addRelationAuthorBook(authorId, bookId, connection);
                     }
                 }
             } else {
