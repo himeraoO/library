@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @Feature(value = "Тестирование AuthorDAO")
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AuthorDAOImplTest extends AbstractBaseClassWithBDTest {
+class AuthorDAOImplTest extends BaseDAOWithBDTest {
 
     private SessionManager sessionManager;
     private AuthorDAO authorDAO;

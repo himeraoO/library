@@ -27,6 +27,7 @@ public class BaseRepositoryTest {
 
     protected AuthorRepository authorRepository;
     protected GenreRepository genreRepository;
+    protected BookRepository bookRepository;
 
     @Mock
     protected AuthorDAO authorDAO;
@@ -44,6 +45,7 @@ public class BaseRepositoryTest {
 
         authorRepository = new AuthorRepositoryImpl(sessionManager, authorDAO, genreDAO, bookDAO);
         genreRepository = new GenreRepositoryImpl(sessionManager, genreDAO, bookDAO);
+        bookRepository = new BookRepositoryImpl(sessionManager, bookDAO, genreDAO, authorDAO);
 
         lenient().when(sessionManager.getCurrentSession()).thenReturn(connection);
 
@@ -55,27 +57,58 @@ public class BaseRepositoryTest {
     private void initBookRepositoryMock() throws SQLException {
         int authorId = 1;
         Author author = getAuthorFromBD(authorId);
+
+        int bookId = 1;
+        Genre genre = getGenre(1, "genre1");
+        Book book = getBook(bookId, "book1", genre);
+
+        Author author1 = getAuthor(1, "author_name1", "author_surname1", new ArrayList<>());
+        book.getAuthorList().add(author1);
+
         lenient().when(bookDAO.findAllBook(connection)).thenReturn(author.getBookList());
+        lenient().when(bookDAO.findBookById(bookId, connection)).thenReturn(Optional.of(book));
+
+        int genreId = 1;
+        lenient().when(bookDAO.countBookByGenreId(genreId, connection)).thenReturn(0);
+
+        int addedId = 1;
+        lenient().when(bookDAO.saveBook(book, connection)).thenReturn(addedId);
+        lenient().when(bookDAO.countBookByTitle(book.getTitle(), connection)).thenReturn(0);
+
+        int rowUpdatedExpected = 1;
+
+        Book bookForUpdate = getBook(bookId, "book1U", genre);
+        bookForUpdate.getAuthorList().add(author1);
+        lenient().when(bookDAO.updatedBook(bookForUpdate, connection)).thenReturn(rowUpdatedExpected);
+
+        int rowDeletedExpected = 1;
+        lenient().when(bookDAO.deleteBook(bookId, connection)).thenReturn(rowDeletedExpected);
+        lenient().doNothing().when(bookDAO).removeRelationAuthorBook(bookId, book.getAuthorList(), connection);
     }
 
     private void initGenreRepositoryMock() throws SQLException {
-//        int authorId = 1;
-//        Author author = getAuthorFromBD(authorId);
-//
-//        int genreId = 1;
-//        Genre genre = getGenre(1, "genre1");
-//
-//        lenient().when(genreDAO.findAllGenre(connection)).thenReturn(Arrays.asList(author.getBookList().get(0).getGenre(), author.getBookList().get(1).getGenre()));
-//        lenient().when(genreDAO.findGenreById(genreId, connection)).thenReturn(Optional.of(genre));
-//
-//        List<Genre> genreList = new ArrayList<>();
-//        genreList.add(genre);
-//        lenient().when(genreDAO.findAllGenre(connection)).thenReturn(genreList);
-//
-//        lenient().when(genreDAO.saveGenre(genre, connection)).thenReturn(1);
-//        lenient().when(genreDAO.countGenreByName(genre.getName(), connection)).thenReturn(0);
-//
-//        Genre genreForUpdate = getGenre(genreId, "genre1U");
+        int authorId = 1;
+        Author author = getAuthorFromBD(authorId);
+
+        int genreId = 1;
+        Genre genre = getGenre(1, "genre1");
+
+        lenient().when(genreDAO.findAllGenre(connection)).thenReturn(Arrays.asList(author.getBookList().get(0).getGenre(), author.getBookList().get(1).getGenre()));
+        lenient().when(genreDAO.findGenreById(genreId, connection)).thenReturn(Optional.of(genre));
+
+        List<Genre> genreList = new ArrayList<>();
+        genreList.add(genre);
+        lenient().when(genreDAO.findAllGenre(connection)).thenReturn(genreList);
+
+        lenient().when(genreDAO.saveGenre(genre, connection)).thenReturn(1);
+        lenient().when(genreDAO.countGenreByName(genre.getName(), connection)).thenReturn(0);
+
+        int rowUpdatedExpected = 1;
+        Genre genreForUpdate = getGenre(genreId, "genre1U");
+        lenient().when(genreDAO.updatedGenre(genreForUpdate, connection)).thenReturn(rowUpdatedExpected);
+
+        int rowDeletedExpected = 1;
+        lenient().when(genreDAO.deleteGenre(genreId, connection)).thenReturn(rowDeletedExpected);
     }
 
     private void initAuthorRepositoryMock() throws SQLException {

@@ -2,9 +2,7 @@ package com.github.himeraoo.library.repository;
 
 import com.github.himeraoo.library.models.Author;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -13,9 +11,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(MockitoExtension.class)
 class AuthorRepositoryImplTest extends BaseRepositoryTest {
-
 
     @Test
     void findById() throws SQLException {

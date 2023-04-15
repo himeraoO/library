@@ -1,6 +1,5 @@
 package com.github.himeraoo.library.repository;
 
-import com.github.himeraoo.library.models.Author;
 import com.github.himeraoo.library.models.Genre;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -10,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class GenreRepositoryImplTest extends BaseRepositoryTest{
+class GenreRepositoryImplTest extends BaseRepositoryTest {
 
     @Test
     void findById() throws SQLException {
@@ -65,6 +64,14 @@ class GenreRepositoryImplTest extends BaseRepositoryTest{
     }
 
     @Test
-    void deleteById() {
+    void deleteById() throws SQLException {
+        int genreId = 1;
+        int rowDeletedExpected = 1;
+
+        int rowDeleted = genreRepository.deleteById(1);
+
+        Mockito.verify(genreDAO, Mockito.times(1)).deleteGenre(genreId, connection);
+        Mockito.verify(bookDAO, Mockito.times(1)).countBookByGenreId(genreId, connection);
+        assertEquals(rowDeletedExpected, rowDeleted);
     }
 }
