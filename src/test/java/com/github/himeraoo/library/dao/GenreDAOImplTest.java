@@ -53,7 +53,7 @@ class GenreDAOImplTest extends BaseDAOWithBDTest {
 
     @Test
     @Order(1)
-    @DisplayName("Тест поиска анра по ID")
+    @DisplayName("Тест поиска жанра по ID")
     @Story(value = "Тестирование метода поиска по ID")
     void findGenreById() {
         sessionManager.beginSession();
