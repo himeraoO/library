@@ -22,7 +22,6 @@ import static com.github.himeraoo.library.util.TestUtils.getAuthorWithoutBooks;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
-
 public class BaseServiceTest {
 
     protected AuthorService authorService;
