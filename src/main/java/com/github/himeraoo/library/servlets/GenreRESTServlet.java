@@ -198,7 +198,6 @@ public class GenreRESTServlet extends HttpServlet {
         }
     }
 
-    //нужна проверка на добавление повторов
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String requestPath = req.getRequestURI();

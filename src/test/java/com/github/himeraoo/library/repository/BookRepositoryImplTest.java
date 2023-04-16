@@ -13,10 +13,12 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mockito;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static com.github.himeraoo.library.util.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Epic(value = "Тестирование слоя Repository")
@@ -29,11 +31,7 @@ class BookRepositoryImplTest extends BaseRepositoryTest {
     @Story(value = "Тестирование метода поиска по ID")
     void findById() throws SQLException {
         int bookId = 1;
-        Genre genre = getGenre(1, "genre1");
-        Book expectedBook = getBook(bookId, "book1", genre);
-
-        Author author = getAuthor(1, "author_name1", "author_surname1", new ArrayList<>());
-        expectedBook.getAuthorList().add(author);
+        Book expectedBook = getFullBook(bookId);
 
         Optional<Book> optionalBook = bookRepository.findById(bookId);
 
@@ -47,18 +45,14 @@ class BookRepositoryImplTest extends BaseRepositoryTest {
     void findAll() throws SQLException {
         int bookId = 1;
         Genre genre = getGenre(1, "genre1");
-        Book oldBook = getBook(bookId, "book1", genre);
-
-        Author author = getAuthor(1, "author_name1", "author_surname1", new ArrayList<>());
-        oldBook.getAuthorList().add(author);
+        Author author = getAuthorWithoutBooks(1, "author_name1", "author_surname1");
+        Book oldBook = getBook(bookId, "book1", genre, Collections.singletonList(author));
 
         int bookId5 = 5;
         Genre genre5 = getGenre(5, "genre5");
-        Book oldBook5 = getBook(bookId5, "book5", genre5);
+        Book oldBook5 = getBook(bookId5, "book5", genre5, Collections.singletonList(author));
 
-        List<Book> expectedBookList = new ArrayList<>();
-        expectedBookList.add(oldBook);
-        expectedBookList.add(oldBook5);
+        List<Book> expectedBookList = Arrays.asList(oldBook, oldBook5);
 
         List<Book> bookListFromBD = bookRepository.findAll();
 
@@ -73,17 +67,14 @@ class BookRepositoryImplTest extends BaseRepositoryTest {
         int expectedAddedId = 1;
 
         int bookId = 1;
-        Genre genre = getGenre(1, "genre1");
-        Book book = getBook(bookId, "book1", genre);
-        Author author = getAuthor(1, "author_name1", "author_surname1", new ArrayList<>());
-        book.getAuthorList().add(author);
+        Book book = getFullBook(bookId);
 
         int addedId = bookRepository.save(book);
 
         Mockito.verify(bookDAO, Mockito.times(1)).countBookByTitle(book.getTitle(), connection);
         Mockito.verify(genreDAO, Mockito.times(1)).findAllGenre(connection);
         Mockito.verify(bookDAO, Mockito.times(1)).saveBook(book, connection);
-        Mockito.verify(bookDAO, Mockito.times(1)).addRelationAuthorBook(author.getId(), bookId, connection);
+        Mockito.verify(bookDAO, Mockito.times(1)).addRelationAuthorBook(book.getAuthorList().get(0).getId(), bookId, connection);
         assertEquals(expectedAddedId, addedId);
     }
 
@@ -92,11 +83,7 @@ class BookRepositoryImplTest extends BaseRepositoryTest {
     @Story(value = "Тестирование метода обновления элемента")
     void update() throws SQLException {
         int bookId = 1;
-        Genre genre = getGenre(1, "genre1");
-        Book book = getBook(bookId, "book1U", genre);
-        Author author = getAuthor(1, "author_name1", "author_surname1", new ArrayList<>());
-        book.getAuthorList().add(author);
-
+        Book book = getFullBook(bookId, "book1U");
         int rowUpdatedExpected = 1;
 
         int rowUpdated = bookRepository.update(book);
@@ -107,7 +94,7 @@ class BookRepositoryImplTest extends BaseRepositoryTest {
         Mockito.verify(genreDAO, Mockito.times(1)).findAllGenre(connection);
         Mockito.verify(bookDAO, Mockito.times(1)).getAuthorListFromBDByBookId(bookId, connection);
         Mockito.verify(authorDAO, Mockito.times(1)).findAllAuthor(connection);
-        Mockito.verify(bookDAO, Mockito.times(1)).addRelationAuthorBook(author.getId(), bookId, connection);
+        Mockito.verify(bookDAO, Mockito.times(1)).addRelationAuthorBook(book.getAuthorList().get(0).getId(), bookId, connection);
         assertEquals(rowUpdatedExpected, rowUpdated);
     }
 
@@ -116,10 +103,7 @@ class BookRepositoryImplTest extends BaseRepositoryTest {
     @Story(value = "Тестирование метода удаления элемента по ID")
     void deleteById() throws SQLException {
         int bookId = 1;
-        Genre genre = getGenre(1, "genre1");
-        Book book = getBook(bookId, "book1", genre);
-        Author author = getAuthor(1, "author_name1", "author_surname1", new ArrayList<>());
-        book.getAuthorList().add(author);
+        Book book = getFullBook(bookId);
 
         int rowDeletedExpected = 1;
 

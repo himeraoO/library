@@ -1,21 +1,24 @@
 package com.github.himeraoo.library.service;
 
-import com.github.himeraoo.library.dto.AuthorDTO;
-import com.github.himeraoo.library.dto.BookDTO;
-import com.github.himeraoo.library.dto.GenreDTO;
+import com.github.himeraoo.library.exception.ElementHasNotFoundException;
 import com.github.himeraoo.library.models.Author;
 import com.github.himeraoo.library.models.Book;
 import com.github.himeraoo.library.models.Genre;
-import com.github.himeraoo.library.repository.*;
-import org.jetbrains.annotations.NotNull;
+import com.github.himeraoo.library.repository.AuthorRepository;
+import com.github.himeraoo.library.repository.BookRepository;
+import com.github.himeraoo.library.repository.GenreRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
+import static com.github.himeraoo.library.util.TestUtils.*;
+import static com.github.himeraoo.library.util.TestUtils.getAuthorWithoutBooks;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,19 +55,44 @@ public class BaseServiceTest {
         lenient().when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
         lenient().when(bookRepository.findAll()).thenReturn(bookList);
         lenient().when(bookRepository.save(book)).thenReturn(1);
-        lenient().when(bookRepository.update(book)).thenReturn(1);
+        Book bookSaveNotAdded = getBookWithoutAuthors(0, "NotAdded", getFullGenre(1));
+        lenient().when(bookRepository.save(bookSaveNotAdded)).thenReturn(0);
+        Book bookSaveNotAddedIsExist = getBookWithoutAuthors(777, "exist", getFullGenre(1));
+        lenient().when(bookRepository.save(bookSaveNotAddedIsExist)).thenReturn(-1);
+        Book bookForUpdate = getFullBook(bookId, "book1U");
+        lenient().when(bookRepository.update(bookForUpdate)).thenReturn(1);
+
+        Book bookForUpdateNotFound = getBookWithoutAuthors(100, "NotFound", getFullGenre(1));
+        lenient().when(bookRepository.update(bookForUpdateNotFound)).thenReturn(0);
+        Book bookForUpdateNotUpdated = getBookWithoutAuthors(0, "NotUpdated", getFullGenre(1));
+        lenient().when(bookRepository.update(bookForUpdateNotUpdated)).thenReturn(-1);
+
         lenient().when(bookRepository.deleteById(bookId)).thenReturn(1);
+        lenient().when(bookRepository.findById(100)).thenReturn(Optional.empty());
+        lenient().when(bookRepository.deleteById(100)).thenReturn(0);
     }
 
     private void initGenreServiceMock() throws SQLException {
         int genreId = 1;
-        Genre genre = getGenre(genreId, "genre1");
+        Genre genre = getFullGenre(genreId);
         List<Genre> genreList = Collections.singletonList(genre);
         lenient().when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
         lenient().when(genreRepository.findAll()).thenReturn(genreList);
         lenient().when(genreRepository.save(genre)).thenReturn(1);
-        lenient().when(genreRepository.update(genre)).thenReturn(1);
+        Genre genreSaveNotAdded = getFullGenre(0, "NotAdded");
+        lenient().when(genreRepository.save(genreSaveNotAdded)).thenReturn(0);
+        Genre genreSaveNotAddedIsExist = getFullGenre(777, "exist");
+        lenient().when(genreRepository.save(genreSaveNotAddedIsExist)).thenReturn(-1);
+        Genre genreForUpdate = getFullGenre(genreId, "genre1U");
+        lenient().when(genreRepository.update(genreForUpdate)).thenReturn(1);
+        Genre genreForUpdateNotFound = getFullGenre(100, "genre1");
+        lenient().when(genreRepository.update(genreForUpdateNotFound)).thenReturn(0);
+        Genre genreForUpdateNotUpdated = getFullGenre(0, "genre0");
+        lenient().when(genreRepository.update(genreForUpdateNotUpdated)).thenReturn(-1);
         lenient().when(genreRepository.deleteById(genreId)).thenReturn(1);
+        lenient().when(genreRepository.findById(100)).thenReturn(Optional.empty());
+        lenient().when(genreRepository.deleteById(100)).thenReturn(0);
+        lenient().when(genreRepository.deleteById(0)).thenReturn(-1);
     }
 
     private void initAuthorServiceMock() throws SQLException {
@@ -74,99 +102,14 @@ public class BaseServiceTest {
         lenient().when(authorRepository.findById(authorId)).thenReturn(Optional.of(author));
         lenient().when(authorRepository.findAll()).thenReturn(authorList);
         lenient().when(authorRepository.save(author)).thenReturn(1);
-        lenient().when(authorRepository.update(author)).thenReturn(1);
+        Author authorSaveNotAdded = getAuthorWithoutBooks(404, "NotAdded", "NotAdded");
+        lenient().when(authorRepository.save(authorSaveNotAdded)).thenReturn(0);
+        Author authorSaveNotAddedIsExist = getAuthorWithoutBooks(400, "exist", "exist");
+        lenient().when(authorRepository.save(authorSaveNotAddedIsExist)).thenReturn(-1);
+        Author authorForUpdate = getFullAuthor(authorId, "author_name1U", "author_surname1U");
+        lenient().when(authorRepository.update(authorForUpdate)).thenReturn(1);
         lenient().when(authorRepository.deleteById(authorId)).thenReturn(1);
-    }
-
-    @NotNull
-    protected Author getFullAuthor(int authorId) {
-        Genre genre1 = getGenre(1, "genre1");
-        Book book1 = getBook(1, "book1", genre1);
-
-        Genre genre2 = getGenre(5, "genre5");
-        Book book2 = getBook(5, "book5", genre2);
-
-        return getAuthor(authorId, "author_name1", "author_surname1", Arrays.asList(book1, book2));
-    }
-    @NotNull
-    protected Book getFullBook(int bookId) {
-        Genre genre = getGenre(1, "genre1");
-        Book book = getBook(bookId, "book1", genre);
-        Author author = getAuthor(1, "author_name1", "author_surname1", new ArrayList<>());
-        book.getAuthorList().add(author);
-        return book;
-    }
-
-    @NotNull
-    protected Genre getGenre(int genreId, String genreName) {
-        Genre genre = new Genre();
-        genre.setId(genreId);
-        genre.setName(genreName);
-        return genre;
-    }
-
-    @NotNull
-    protected Book getBook(int bookId, String bookName, Genre genre) {
-        Book book = new Book();
-        book.setId(bookId);
-        book.setTitle(bookName);
-        book.setGenre(genre);
-        return book;
-    }
-
-    @NotNull
-    protected Author getAuthor(int authorId, String authorName, String authorSurname, List<Book> bookList) {
-        Author author = new Author();
-        author.setId(authorId);
-        author.setName(authorName);
-        author.setSurname(authorSurname);
-        author.setBookList(bookList);
-        return author;
-    }
-
-    @NotNull
-    protected AuthorDTO getAuthorDTO(int authorId, String authorName, String authorSurname, List<Book> bookList) {
-        AuthorDTO authorDTO = new AuthorDTO();
-        authorDTO.setId(authorId);
-        authorDTO.setName(authorName);
-        authorDTO.setSurname(authorSurname);
-        authorDTO.setBookList(bookList);
-        return authorDTO;
-    }
-
-    @NotNull
-    protected GenreDTO getGenreDTO(int genreId, String genreName) {
-        GenreDTO genreDTO = new GenreDTO();
-        genreDTO.setId(genreId);
-        genreDTO.setName(genreName);
-        return genreDTO;
-    }
-
-    @NotNull
-    protected BookDTO getBookDTO(int bookId, String bookName, Genre genre) {
-        BookDTO bookDTO = new BookDTO();
-        bookDTO.setId(bookId);
-        bookDTO.setTitle(bookName);
-        bookDTO.setGenre(genre);
-        return bookDTO;
-    }
-
-    @NotNull
-    protected AuthorDTO getFullAuthorDTO(int authorId) {
-        Genre genre1 = getGenre(1, "genre1");
-        Book book1 = getBook(1, "book1", genre1);
-
-        Genre genre2 = getGenre(5, "genre5");
-        Book book2 = getBook(5, "book5", genre2);
-
-        return getAuthorDTO(authorId, "author_name1", "author_surname1", Arrays.asList(book1, book2));
-    }
-    @NotNull
-    protected BookDTO getFullBookDTO(int bookId) {
-        Genre genre = getGenre(1, "genre1");
-        BookDTO bookDTO = getBookDTO(bookId, "book1", genre);
-        Author author = getAuthor(1, "author_name1", "author_surname1", new ArrayList<>());
-        bookDTO.getAuthorList().add(author);
-        return bookDTO;
+        lenient().when(authorRepository.findById(100)).thenReturn(Optional.empty());
+        lenient().when(authorRepository.deleteById(100)).thenReturn(0);
     }
 }

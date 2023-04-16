@@ -7,7 +7,6 @@ import com.github.himeraoo.library.jdbc.SessionManager;
 import com.github.himeraoo.library.models.Author;
 import com.github.himeraoo.library.models.Book;
 import com.github.himeraoo.library.models.Genre;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -15,11 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
 import java.util.Optional;
 
+import static com.github.himeraoo.library.util.TestUtils.*;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,145 +55,49 @@ public class BaseRepositoryTest {
 
     private void initBookRepositoryMock() throws SQLException {
         int authorId = 1;
-        Author author = getAuthorFromBD(authorId);
-
+        Author author = getFullAuthor(authorId);
         int bookId = 1;
-        Genre genre = getGenre(1, "genre1");
-        Book book = getBook(bookId, "book1", genre);
-
-        Author author1 = getAuthor(1, "author_name1", "author_surname1", new ArrayList<>());
-        book.getAuthorList().add(author1);
-
+        Book book = getFullBook(bookId);
         lenient().when(bookDAO.findAllBook(connection)).thenReturn(author.getBookList());
         lenient().when(bookDAO.findBookById(bookId, connection)).thenReturn(Optional.of(book));
-
         int genreId = 1;
         lenient().when(bookDAO.countBookByGenreId(genreId, connection)).thenReturn(0);
-
-        int addedId = 1;
-        lenient().when(bookDAO.saveBook(book, connection)).thenReturn(addedId);
+        lenient().when(bookDAO.saveBook(book, connection)).thenReturn(1);
         lenient().when(bookDAO.countBookByTitle(book.getTitle(), connection)).thenReturn(0);
-
-        int rowUpdatedExpected = 1;
-
-        Book bookForUpdate = getBook(bookId, "book1U", genre);
-        bookForUpdate.getAuthorList().add(author1);
-        lenient().when(bookDAO.updatedBook(bookForUpdate, connection)).thenReturn(rowUpdatedExpected);
-
-        int rowDeletedExpected = 1;
-        lenient().when(bookDAO.deleteBook(bookId, connection)).thenReturn(rowDeletedExpected);
+        Book bookForUpdate = getFullBook(bookId, "book1U");
+        lenient().when(bookDAO.updatedBook(bookForUpdate, connection)).thenReturn(1);
+        lenient().when(bookDAO.deleteBook(bookId, connection)).thenReturn(1);
         lenient().doNothing().when(bookDAO).removeRelationAuthorBook(bookId, book.getAuthorList(), connection);
     }
 
     private void initGenreRepositoryMock() throws SQLException {
         int authorId = 1;
-        Author author = getAuthorFromBD(authorId);
-
+        Author author = getFullAuthor(authorId);
         int genreId = 1;
-        Genre genre = getGenre(1, "genre1");
-
+        Genre genre = getFullGenre(genreId);
         lenient().when(genreDAO.findAllGenre(connection)).thenReturn(Arrays.asList(author.getBookList().get(0).getGenre(), author.getBookList().get(1).getGenre()));
         lenient().when(genreDAO.findGenreById(genreId, connection)).thenReturn(Optional.of(genre));
-
-        List<Genre> genreList = new ArrayList<>();
-        genreList.add(genre);
-        lenient().when(genreDAO.findAllGenre(connection)).thenReturn(genreList);
-
+        lenient().when(genreDAO.findAllGenre(connection)).thenReturn(Collections.singletonList(genre));
         lenient().when(genreDAO.saveGenre(genre, connection)).thenReturn(1);
         lenient().when(genreDAO.countGenreByName(genre.getName(), connection)).thenReturn(0);
-
-        int rowUpdatedExpected = 1;
-        Genre genreForUpdate = getGenre(genreId, "genre1U");
-        lenient().when(genreDAO.updatedGenre(genreForUpdate, connection)).thenReturn(rowUpdatedExpected);
-
-        int rowDeletedExpected = 1;
-        lenient().when(genreDAO.deleteGenre(genreId, connection)).thenReturn(rowDeletedExpected);
+        Genre genreForUpdate = getFullGenre(genreId, "genre1U");
+        lenient().when(genreDAO.updatedGenre(genreForUpdate, connection)).thenReturn(1);
+        lenient().when(genreDAO.deleteGenre(genreId, connection)).thenReturn(1);
     }
 
     private void initAuthorRepositoryMock() throws SQLException {
         int authorId = 1;
-        Author author = getAuthorFromBD(authorId);
-
+        Author author = getFullAuthor(authorId);
         lenient().when(authorDAO.findAuthorById(authorId, connection)).thenReturn(Optional.of(author));
-
-        List<Author> authorList = new ArrayList<>();
-        authorList.add(author);
-        lenient().when(authorDAO.findAllAuthor(connection)).thenReturn(authorList);
-
-        int rowDeletedExpected = 1;
-        lenient().when(authorDAO.deleteAuthor(authorId, connection)).thenReturn(rowDeletedExpected);
-
-        int rowUpdatedExpected = 1;
-        Author authorForUpdate = getAuthorForUpdate(authorId);
-        lenient().when(authorDAO.updatedAuthor(authorForUpdate, connection)).thenReturn(rowUpdatedExpected);
-
-        int addedId = 1;
-        lenient().when(authorDAO.saveAuthor(author, connection)).thenReturn(addedId);
-
+        lenient().when(authorDAO.findAllAuthor(connection)).thenReturn(Collections.singletonList(author));
+        lenient().when(authorDAO.deleteAuthor(authorId, connection)).thenReturn(1);
+        Author authorForUpdate = getFullAuthor(authorId, "author_name1U", "author_surname1U");
+        lenient().when(authorDAO.updatedAuthor(authorForUpdate, connection)).thenReturn(1);
+        lenient().when(authorDAO.saveAuthor(author, connection)).thenReturn(1);
         lenient().when(authorDAO.countAuthorByNameAndSurname(author.getName(), author.getSurname(), connection)).thenReturn(0);
         lenient().doNothing().when(authorDAO).addRelationAuthorBook(authorId, 1, connection);
         lenient().doNothing().when(authorDAO).addRelationAuthorBook(authorId, 5, connection);
         lenient().doNothing().when(authorDAO).removeRelationBookAuthor(authorId, author.getBookList(), connection);
         lenient().when(authorDAO.getBookListFromBDByAuthorId(authorId, connection)).thenReturn(author.getBookList());
-    }
-
-    @NotNull
-    protected Author getAuthorFromBD(int authorId) {
-        Genre genre1 = getGenre(1, "genre1");
-        Book book1 = getBook(1, "book1", genre1);
-
-        Genre genre2 = getGenre(5, "genre5");
-        Book book2 = getBook(5, "book5", genre2);
-
-        return getAuthor(authorId, "author_name1", "author_surname1", Arrays.asList(book1, book2));
-    }
-
-    @NotNull
-    protected Author getAuthorForUpdate(int authorId) {
-        Genre genre1 = getGenre(1, "genre1");
-        Book book1 = getBook(1, "book1", genre1);
-
-        Genre genre2 = getGenre(5, "genre5");
-        Book book2 = getBook(5, "book5", genre2);
-
-        return getAuthor(authorId, "author_name1U", "author_surname1U", Arrays.asList(book1, book2));
-    }
-
-    @NotNull
-    protected Author getAuthorForSave(int authorId) {
-        Genre genre1 = getGenre(1, "genre1");
-        Book book1 = getBook(1, "book1", genre1);
-
-        Genre genre2 = getGenre(5, "genre5");
-        Book book2 = getBook(5, "book5", genre2);
-
-        return getAuthor(authorId, "author_name1", "author_surname1", Arrays.asList(book1, book2));
-    }
-
-    @NotNull
-    protected Genre getGenre(int genreId, String genreName) {
-        Genre genre = new Genre();
-        genre.setId(genreId);
-        genre.setName(genreName);
-        return genre;
-    }
-
-    @NotNull
-    protected Book getBook(int bookId, String bookName, Genre genre) {
-        Book book = new Book();
-        book.setId(bookId);
-        book.setTitle(bookName);
-        book.setGenre(genre);
-        return book;
-    }
-
-    @NotNull
-    protected Author getAuthor(int authorId, String authorName, String authorSurname, List<Book> bookList) {
-        Author author = new Author();
-        author.setId(authorId);
-        author.setName(authorName);
-        author.setSurname(authorSurname);
-        author.setBookList(bookList);
-        return author;
     }
 }

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.github.himeraoo.library.util.TestUtils.getFullAuthor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Epic(value = "Тестирование слоя Repository")
@@ -27,7 +28,7 @@ class AuthorRepositoryImplTest extends BaseRepositoryTest {
     @Story(value = "Тестирование метода поиска по ID")
     void findById() throws SQLException {
         int authorId = 1;
-        Author expectedAuthor = getAuthorFromBD(1);
+        Author expectedAuthor = getFullAuthor(authorId);
 
         Optional<Author> optionalAuthor = authorRepository.findById(authorId);
 
@@ -39,7 +40,7 @@ class AuthorRepositoryImplTest extends BaseRepositoryTest {
     @DisplayName("Тест поиска всех авторов")
     @Story(value = "Тестирование метода поиска всех элементов")
     void findAll() throws SQLException {
-        Author oldAuthor = getAuthorFromBD(1);
+        Author oldAuthor = getFullAuthor(1);
         List<Author> expectedAuthorList = new ArrayList<>();
         expectedAuthorList.add(oldAuthor);
 
@@ -56,7 +57,7 @@ class AuthorRepositoryImplTest extends BaseRepositoryTest {
         int authorId = 1;
         int expectedAddedId = 1;
 
-        Author authorForSave = getAuthorForSave(authorId);
+        Author authorForSave = getFullAuthor(authorId);
         int addedId = authorRepository.save(authorForSave);
 
         Mockito.verify(authorDAO, Mockito.times(1)).saveAuthor(authorForSave, connection);
@@ -74,7 +75,7 @@ class AuthorRepositoryImplTest extends BaseRepositoryTest {
     void update() throws SQLException {
         int authorId = 1;
         int rowUpdatedExpected = 1;
-        Author author = getAuthorForUpdate(authorId);
+        Author author = getFullAuthor(authorId, "author_name1U", "author_surname1U");
 
         int rowUpdated = authorRepository.update(author);
 
@@ -92,10 +93,10 @@ class AuthorRepositoryImplTest extends BaseRepositoryTest {
     @Story(value = "Тестирование метода удаления элемента по ID")
     void deleteById() throws SQLException {
         int authorId = 1;
-        Author author = getAuthorFromBD(authorId);
+        Author author = getFullAuthor(authorId);
         int rowDeletedExpected = 1;
 
-        int rowDeleted = authorRepository.deleteById(1);
+        int rowDeleted = authorRepository.deleteById(authorId);
 
         Mockito.verify(authorDAO, Mockito.times(1)).deleteAuthor(authorId, connection);
         Mockito.verify(authorDAO, Mockito.times(1)).findAuthorById(authorId, connection);

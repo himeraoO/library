@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.github.himeraoo.library.util.TestUtils.getFullGenre;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Epic(value = "Тестирование слоя Repository")
@@ -28,7 +29,7 @@ class GenreRepositoryImplTest extends BaseRepositoryTest {
     void findById() throws SQLException {
         int genreId = 1;
 
-        Genre expectedGenre = getGenre(1, "genre1");
+        Genre expectedGenre = getFullGenre(genreId);
 
         Optional<Genre> optionalGenre = genreRepository.findById(genreId);
 
@@ -40,7 +41,7 @@ class GenreRepositoryImplTest extends BaseRepositoryTest {
     @DisplayName("Тест поиска всех жанров")
     @Story(value = "Тестирование метода поиска всех элементов")
     void findAll() throws SQLException {
-        Genre oldGenre = getGenre(1, "genre1");
+        Genre oldGenre = getFullGenre(1);
         List<Genre> expectedGenreList = new ArrayList<>();
         expectedGenreList.add(oldGenre);
 
@@ -57,7 +58,7 @@ class GenreRepositoryImplTest extends BaseRepositoryTest {
         int genreId = 1;
         int expectedAddedId = 1;
 
-        Genre genreForSave = getGenre(genreId, "genre1");
+        Genre genreForSave = getFullGenre(genreId);
         int addedId = genreRepository.save(genreForSave);
 
         Mockito.verify(genreDAO, Mockito.times(1)).saveGenre(genreForSave, connection);
@@ -72,7 +73,7 @@ class GenreRepositoryImplTest extends BaseRepositoryTest {
         int genreId = 1;
         int rowUpdatedExpected = 1;
 
-        Genre genreForUpdate = getGenre(genreId, "genre1U");
+        Genre genreForUpdate = getFullGenre(genreId, "genre1U");
         int rowUpdated = genreRepository.update(genreForUpdate);
 
         Mockito.verify(genreDAO, Mockito.times(1)).updatedGenre(genreForUpdate, connection);
