@@ -18,7 +18,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.github.himeraoo.library.util.TestUtils.*;
+import static com.github.himeraoo.library.util.TestUtils.getAuthorWithoutBooks;
+import static com.github.himeraoo.library.util.TestUtils.getBook;
+import static com.github.himeraoo.library.util.TestUtils.getFullBook;
+import static com.github.himeraoo.library.util.TestUtils.getGenre;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Epic(value = "Тестирование слоя Repository")

@@ -1,9 +1,8 @@
 package com.github.himeraoo.library.servlets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.himeraoo.library.dto.GenreDTO;
+import com.github.himeraoo.library.dto.BookDTO;
 import com.github.himeraoo.library.exception.ElementHasNotAddedException;
-import com.github.himeraoo.library.exception.ElementHasNotDeletedException;
 import com.github.himeraoo.library.exception.ElementHasNotFoundException;
 import com.github.himeraoo.library.exception.ElementHasNotUpdatedException;
 import io.qameta.allure.Epic;
@@ -26,120 +25,120 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.github.himeraoo.library.util.TestUtils.getFullGenre;
-import static com.github.himeraoo.library.util.TestUtils.getGenreDTO;
+import static com.github.himeraoo.library.util.TestUtils.getBookDTO;
+import static com.github.himeraoo.library.util.TestUtils.getFullBook;
 import static org.mockito.Mockito.lenient;
 
 @Epic(value = "Тестирование слоя RESTServlet")
-@Feature(value = "Тестирование GenreRESTServlet")
+@Feature(value = "Тестирование BookRESTServlet")
 @Execution(ExecutionMode.CONCURRENT)
-class GenreRESTServletTest extends BaseRestServletTest {
+class BookRESTServletTest extends BaseRestServletTest {
 
     @Test
-    @DisplayName("Тест поиска всех жанров")
+    @DisplayName("Тест поиска всех книг")
     @Story(value = "Тестирование метода поиска всех элементов")
-    void doGetAll() throws SQLException, ElementHasNotFoundException, ServletException, IOException {
+    void doGetAll() throws IOException, ServletException, SQLException, ElementHasNotFoundException {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
-        lenient().when(req.getRequestURI()).thenReturn("/genre/");
+        lenient().when(req.getRequestURI()).thenReturn("/book/");
         lenient().when(resp.getWriter()).thenReturn(writer);
 
-        List<GenreDTO> expectedGenreDTOList = Collections.singletonList(getGenreDTO(getFullGenre(1)));
+        List<BookDTO> expectedBookDTOList = Collections.singletonList(getBookDTO(getFullBook(1)));
         ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(expectedGenreDTOList);
+        String json = mapper.writeValueAsString(expectedBookDTOList);
 
-        genreRESTServlet.doGet(req, resp);
+        bookRESTServlet.doGet(req, resp);
 
-        Mockito.verify(genreService, Mockito.times(1)).findAll();
+        Mockito.verify(bookService, Mockito.times(1)).findAll();
         Mockito.verify(resp.getWriter(), Mockito.times(1)).write(json);
     }
 
     @Test
-    @DisplayName("Тест поиска жанра по ID")
+    @DisplayName("Тест поиска книги по ID")
     @Story(value = "Тестирование метода поиска по ID")
-    void doGetFindById() throws SQLException, ElementHasNotFoundException, ServletException, IOException {
+    void doGetFindById() throws IOException, ServletException, SQLException, ElementHasNotFoundException {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
-        lenient().when(req.getRequestURI()).thenReturn("/genre/1");
+        lenient().when(req.getRequestURI()).thenReturn("/book/1");
         lenient().when(resp.getWriter()).thenReturn(writer);
 
-        GenreDTO expectedGenreDTO = getGenreDTO(getFullGenre(1));
+        BookDTO expectedBookDTO = getBookDTO(getFullBook(1));
         ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(expectedGenreDTO);
+        String json = mapper.writeValueAsString(expectedBookDTO);
 
-        genreRESTServlet.doGet(req, resp);
+        bookRESTServlet.doGet(req, resp);
 
-        Mockito.verify(genreService, Mockito.times(1)).findById(1);
+        Mockito.verify(bookService, Mockito.times(1)).findById(1);
         Mockito.verify(resp.getWriter(), Mockito.times(1)).write(json);
     }
 
     @Test
-    @DisplayName("Тест удаления жанра по ID")
+    @DisplayName("Тест удаления книги по ID")
     @Story(value = "Тестирование метода удаления элемента по ID")
-    void doDelete() throws IOException, ServletException, SQLException, ElementHasNotDeletedException, ElementHasNotFoundException {
+    void doDelete() throws IOException, ServletException, SQLException, ElementHasNotFoundException {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
-        lenient().when(req.getRequestURI()).thenReturn("/genre/1");
+        lenient().when(req.getRequestURI()).thenReturn("/book/1");
         lenient().when(resp.getWriter()).thenReturn(writer);
 
         int deleted = 1;
 
-        genreRESTServlet.doDelete(req, resp);
+        bookRESTServlet.doDelete(req, resp);
 
-        Mockito.verify(genreService, Mockito.times(1)).deleteById(1);
+        Mockito.verify(bookService, Mockito.times(1)).deleteById(1);
         Mockito.verify(resp.getWriter(), Mockito.times(1)).write("Удалено записей " + deleted);
     }
 
     @Test
-    @DisplayName("Тест обновления жанра")
+    @DisplayName("Тест обновления книги")
     @Story(value = "Тестирование метода обновления элемента")
-    void doPut() throws ServletException, IOException, ElementHasNotUpdatedException, SQLException, ElementHasNotFoundException {
+    void doPut() throws IOException, ServletException, ElementHasNotUpdatedException, SQLException, ElementHasNotFoundException {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
         BufferedReader reader = Mockito.mock(BufferedReader.class);
 
-        lenient().when(req.getRequestURI()).thenReturn("/genre/1");
+        lenient().when(req.getRequestURI()).thenReturn("/book/1");
         lenient().when(resp.getWriter()).thenReturn(writer);
         lenient().when(req.getReader()).thenReturn(reader);
-        String json = "{\"id\": 1,\"name\": \"GENRE1\"}";
+        String json = "{ \"id\": 1, \"title\": \"book1\", \"genre\": { \"id\": 1, \"name\": \"genre1\" }, \"authorList\": [ { \"id\": 1, \"name\": \"author_name1\", \"surname\": \"author_surname1\", \"bookList\": [] }, { \"id\": 0, \"name\": \"author_name5\", \"surname\": \"author_surname5\", \"bookList\": [] } ] }";
         lenient().when(reader.lines()).thenReturn(Stream.of(json));
         ObjectMapper mapper = new ObjectMapper();
-        GenreDTO genreDTO = mapper.readValue(json, GenreDTO.class);
+        BookDTO bookDTO = mapper.readValue(json, BookDTO.class);
 
         int updated = 1;
 
-        genreRESTServlet.doPut(req, resp);
+        bookRESTServlet.doPut(req, resp);
 
-        Mockito.verify(genreService, Mockito.times(1)).update(genreDTO);
+        Mockito.verify(bookService, Mockito.times(1)).update(bookDTO);
         Mockito.verify(resp.getWriter(), Mockito.times(1)).write("Обновлено записей " + updated);
     }
 
     @Test
-    @DisplayName("Тест сохранения нового жанра")
+    @DisplayName("Тест сохранения новой книги")
     @Story(value = "Тестирование метода сохранения элемента")
-    void doPost() throws ElementHasNotAddedException, SQLException, IOException, ServletException {
+    void doPost() throws IOException, ServletException, ElementHasNotAddedException, SQLException {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
         BufferedReader reader = Mockito.mock(BufferedReader.class);
 
-        lenient().when(req.getRequestURI()).thenReturn("/genre/");
+        lenient().when(req.getRequestURI()).thenReturn("/book/");
         lenient().when(resp.getWriter()).thenReturn(writer);
         lenient().when(req.getReader()).thenReturn(reader);
-        String json = "{\"id\": 1,\"name\": \"GENRE1\"}";
+        String json = "{ \"id\": 1, \"title\": \"book1\", \"genre\": { \"id\": 1, \"name\": \"genre1\" }, \"authorList\": [ { \"id\": 1, \"name\": \"author_name1\", \"surname\": \"author_surname1\", \"bookList\": [] }, { \"id\": 0, \"name\": \"author_name5\", \"surname\": \"author_surname5\", \"bookList\": [] } ] }";
         lenient().when(reader.lines()).thenReturn(Stream.of(json));
         ObjectMapper mapper = new ObjectMapper();
-        GenreDTO genreDTO = mapper.readValue(json, GenreDTO.class);
+        BookDTO bookDTO = mapper.readValue(json, BookDTO.class);
 
         int added = 1;
 
-        genreRESTServlet.doPost(req, resp);
+        bookRESTServlet.doPost(req, resp);
 
-        Mockito.verify(genreService, Mockito.times(1)).save(genreDTO);
+        Mockito.verify(bookService, Mockito.times(1)).save(bookDTO);
         Mockito.verify(resp.getWriter(), Mockito.times(1)).write("Добавлена запись с id " + added);
     }
 }

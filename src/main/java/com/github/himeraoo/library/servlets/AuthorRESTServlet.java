@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @WebServlet("/author/*")
 public class AuthorRESTServlet extends HttpServlet {
 
-    AuthorService authorService;
+    private AuthorService authorService;
 
     public void init() {
         final Object authorService = getServletContext().getAttribute("authorService");

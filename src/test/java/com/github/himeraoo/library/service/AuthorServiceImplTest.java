@@ -19,9 +19,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
-import static com.github.himeraoo.library.util.TestUtils.getAuthorDTO;
-import static com.github.himeraoo.library.util.TestUtils.getAuthorWithoutBooks;
-import static com.github.himeraoo.library.util.TestUtils.getFullAuthor;
+import static com.github.himeraoo.library.util.TestUtils.*;
 import static org.mockito.Mockito.lenient;
 
 @Epic(value = "Тестирование слоя Service")
@@ -44,9 +42,9 @@ class AuthorServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест поиска автора по ID")
+    @DisplayName("Тест ошибки \"Элемент не найден\" в поиске автора по ID")
     @Story(value = "Тестирование метода поиска по ID")
-    void findByIdThrowException() throws SQLException, ElementHasNotFoundException {
+    void findByIdThrowException() {
         int authorID = 100;
 
         Assertions.assertThrows(ElementHasNotFoundException.class, () -> {
@@ -70,9 +68,9 @@ class AuthorServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест поиска всех авторов")
+    @DisplayName("Тест ошибки \"Элементы не найдены\" в поиске всех авторов")
     @Story(value = "Тестирование метода поиска всех элементов")
-    void findAllThrowException() throws SQLException, ElementHasNotFoundException {
+    void findAllThrowException() throws SQLException {
         lenient().when(authorRepository.findAll()).thenReturn(Collections.emptyList());
 
         Assertions.assertThrows(ElementHasNotFoundException.class, () -> {
@@ -96,9 +94,9 @@ class AuthorServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест сохранения нового автора")
+    @DisplayName("Тест ошибки \"Элемент не сохранен\" в сохранении нового автора")
     @Story(value = "Тестирование метода сохранения элемента")
-    void saveThrowExceptionNotAdded() throws ElementHasNotAddedException, SQLException {
+    void saveThrowExceptionNotAdded() {
         int authorID = 404;
         Author authorSaveNotAdded = getAuthorWithoutBooks(authorID, "NotAdded", "NotAdded");
 
@@ -110,9 +108,9 @@ class AuthorServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест сохранения нового автора")
+    @DisplayName("Тест ошибки \"Элемент не сохранен потому что уже существует\" в сохранении нового автора")
     @Story(value = "Тестирование метода сохранения элемента")
-    void saveThrowExceptionNotAddedIsExist() throws ElementHasNotAddedException, SQLException {
+    void saveThrowExceptionNotAddedIsExist() {
         int authorID = 400;
         Author authorBadSave = getAuthorWithoutBooks(authorID, "exist", "exist");
 
@@ -139,9 +137,9 @@ class AuthorServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест обновления автора")
+    @DisplayName("Тест ошибки \"Элемент не найден\" в обновлении автора")
     @Story(value = "Тестирование метода обновления элемента")
-    void updateThrowExceptionNotFound() throws ElementHasNotUpdatedException, SQLException, ElementHasNotFoundException {
+    void updateThrowExceptionNotFound() {
         int authorID = 1;
         Author author = getFullAuthor(authorID, "author_name1", "author_surname1");
         AuthorDTO authorDTO = getAuthorDTO(author);
@@ -152,9 +150,9 @@ class AuthorServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест обновления автора")
+    @DisplayName("Тест ошибки \"Элемент не обновлен\" в обновлении автора")
     @Story(value = "Тестирование метода обновления элемента")
-    void updateThrowExceptionNotUpdated() throws ElementHasNotUpdatedException, SQLException, ElementHasNotFoundException {
+    void updateThrowExceptionNotUpdated() throws SQLException {
         int authorID = 1;
         Author author = getFullAuthor(authorID, "author_name11", "author_surname11");
         AuthorDTO authorDTO = getAuthorDTO(author);
@@ -179,9 +177,9 @@ class AuthorServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест удаления автора по ID")
+    @DisplayName("Тест ошибки \"Элемент не найден\" в удалении автора по ID")
     @Story(value = "Тестирование метода удаления элемента по ID")
-    void deleteByIdThrowException() throws SQLException, ElementHasNotFoundException {
+    void deleteByIdThrowException() {
         int authorID = 100;
 
         Assertions.assertThrows(ElementHasNotFoundException.class, () -> {

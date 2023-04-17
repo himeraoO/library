@@ -1,6 +1,5 @@
 package com.github.himeraoo.library.service;
 
-import com.github.himeraoo.library.exception.ElementHasNotFoundException;
 import com.github.himeraoo.library.models.Author;
 import com.github.himeraoo.library.models.Book;
 import com.github.himeraoo.library.models.Genre;
@@ -17,8 +16,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.github.himeraoo.library.util.TestUtils.*;
 import static com.github.himeraoo.library.util.TestUtils.getAuthorWithoutBooks;
+import static com.github.himeraoo.library.util.TestUtils.getBookWithoutAuthors;
+import static com.github.himeraoo.library.util.TestUtils.getFullAuthor;
+import static com.github.himeraoo.library.util.TestUtils.getFullBook;
+import static com.github.himeraoo.library.util.TestUtils.getFullGenre;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)

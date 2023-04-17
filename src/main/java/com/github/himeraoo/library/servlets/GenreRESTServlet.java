@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @WebServlet("/genre/*")
 public class GenreRESTServlet extends HttpServlet {
 
-    GenreService genreService;
+    private GenreService genreService;
 
     public void init() {
         final Object genreService = getServletContext().getAttribute("genreService");

@@ -18,7 +18,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
-import static com.github.himeraoo.library.util.TestUtils.*;
+import static com.github.himeraoo.library.util.TestUtils.getFullAuthor;
+import static com.github.himeraoo.library.util.TestUtils.getFullBook;
+import static com.github.himeraoo.library.util.TestUtils.getFullGenre;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)

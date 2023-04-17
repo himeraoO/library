@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @WebServlet("/book/*")
 public class BookRESTServlet extends HttpServlet {
 
-    BookService bookService;
+    private BookService bookService;
 
     public void init() {
         final Object bookService = getServletContext().getAttribute("bookService");

@@ -45,9 +45,9 @@ class GenreServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест поиска жанра по ID")
+    @DisplayName("Тест ошибки \"Элемент не найден\" в поиске жанра по ID")
     @Story(value = "Тестирование метода поиска по ID")
-    void findByIdThrowException() throws SQLException, ElementHasNotFoundException {
+    void findByIdThrowException() {
         int genreID = 100;
 
         assertThrows(ElementHasNotFoundException.class, () -> {
@@ -71,9 +71,9 @@ class GenreServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест поиска всех жанров")
+    @DisplayName("Тест ошибки \"Элементы не найдены\" в поиске всех жанров")
     @Story(value = "Тестирование метода поиска всех элементов")
-    void findAllThrowException() throws SQLException, ElementHasNotFoundException {
+    void findAllThrowException() throws SQLException {
         lenient().when(genreRepository.findAll()).thenReturn(Collections.emptyList());
 
         assertThrows(ElementHasNotFoundException.class, () -> {
@@ -97,9 +97,9 @@ class GenreServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест сохранения нового жанра")
+    @DisplayName("Тест ошибки \"Элемент не сохранен\" в сохранении нового жанра")
     @Story(value = "Тестирование метода сохранения элемента")
-    void saveThrowExceptionNotAdded() throws ElementHasNotAddedException, SQLException {
+    void saveThrowExceptionNotAdded() {
         int genreID = 0;
         Genre genreSaveNotAdded = getFullGenre(genreID, "NotAdded");
         GenreDTO genreDTO = getGenreDTO(genreSaveNotAdded);
@@ -110,9 +110,9 @@ class GenreServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест сохранения нового жанра")
+    @DisplayName("Тест ошибки \"Элемент не сохранен потому что уже существует\" в сохранении нового жанра")
     @Story(value = "Тестирование метода сохранения элемента")
-    void saveThrowExceptionNotAddedIsExist() throws ElementHasNotAddedException, SQLException {
+    void saveThrowExceptionNotAddedIsExist() {
         int genreID = 777;
         Genre genreSaveNotAddedIsExist = getFullGenre(genreID, "exist");
         GenreDTO genreDTO = getGenreDTO(genreSaveNotAddedIsExist);
@@ -138,9 +138,9 @@ class GenreServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест обновления жанра")
+    @DisplayName("Тест ошибки \"Элемент не найден\" в обновлении жанра")
     @Story(value = "Тестирование метода обновления элемента")
-    void updateThrowExceptionNotFound() throws ElementHasNotUpdatedException, SQLException, ElementHasNotFoundException {
+    void updateThrowExceptionNotFound() {
         int genreID = 100;
         Genre genreForUpdateNotFound = getFullGenre(genreID, "genre1");
         GenreDTO genreDTO = getGenreDTO(genreForUpdateNotFound);
@@ -151,9 +151,9 @@ class GenreServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест обновления жанра")
+    @DisplayName("Тест ошибки \"Элемент не обновлен\" в обновлении жанра")
     @Story(value = "Тестирование метода обновления элемента")
-    void updateThrowExceptionNotUpdated() throws ElementHasNotUpdatedException, SQLException, ElementHasNotFoundException {
+    void updateThrowExceptionNotUpdated() {
         int genreID = 0;
         Genre genreForUpdateNotUpdated = getFullGenre(genreID, "genre0");
         GenreDTO genreDTO = getGenreDTO(genreForUpdateNotUpdated);
@@ -177,9 +177,9 @@ class GenreServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест удаления жанра по ID")
+    @DisplayName("Тест ошибки \"Элемент не найден\" в удалении жанра по ID")
     @Story(value = "Тестирование метода удаления элемента по ID")
-    void deleteByIdThrowExceptionNotFound() throws SQLException, ElementHasNotDeletedException, ElementHasNotFoundException {
+    void deleteByIdThrowExceptionNotFound() {
         int genreID = 100;
         assertThrows(ElementHasNotFoundException.class, () -> {
             genreService.deleteById(genreID);
@@ -187,9 +187,9 @@ class GenreServiceImplTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("Тест удаления жанра по ID")
+    @DisplayName("Тест ошибки \"Элемент не удалён, так как с ним связаны другие элементы\" в удалении жанра по ID")
     @Story(value = "Тестирование метода удаления элемента по ID")
-    void deleteByIdThrowExceptionNotDeleted() throws SQLException, ElementHasNotDeletedException, ElementHasNotFoundException {
+    void deleteByIdThrowExceptionNotDeleted() {
         int genreID = 0;
         assertThrows(ElementHasNotDeletedException.class, () -> {
             genreService.deleteById(genreID);
