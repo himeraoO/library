@@ -1,11 +1,5 @@
 package com.github.himeraoo.library.servlets;
 
-import com.github.himeraoo.library.dao.AuthorDAO;
-import com.github.himeraoo.library.dao.AuthorDAOImpl;
-import com.github.himeraoo.library.dao.BookDAO;
-import com.github.himeraoo.library.dao.BookDAOImpl;
-import com.github.himeraoo.library.dao.GenreDAO;
-import com.github.himeraoo.library.dao.GenreDAOImpl;
 import com.github.himeraoo.library.jdbc.SessionManager;
 import com.github.himeraoo.library.jdbc.SessionManagerJDBC;
 import com.github.himeraoo.library.repository.AuthorRepository;
@@ -53,13 +47,9 @@ public class ContextListener implements ServletContextListener {
             e.printStackTrace();
         }
 
-        AuthorDAO authorDAO = new AuthorDAOImpl();
-        GenreDAO genreDAO = new GenreDAOImpl();
-        BookDAO bookDAO = new BookDAOImpl();
-
-        AuthorRepository authorRepository = new AuthorRepositoryImpl(sessionManager, authorDAO, genreDAO, bookDAO);
-        BookRepository bookRepository = new BookRepositoryImpl(sessionManager, bookDAO, genreDAO, authorDAO);
-        GenreRepository genreRepository = new GenreRepositoryImpl(sessionManager, genreDAO, bookDAO);
+        AuthorRepository authorRepository = new AuthorRepositoryImpl(sessionManager);
+        BookRepository bookRepository = new BookRepositoryImpl(sessionManager);
+        GenreRepository genreRepository = new GenreRepositoryImpl(sessionManager);
 
         AuthorService authorService = new AuthorServiceImpl(authorRepository);
         BookService bookService = new BookServiceImpl(bookRepository);

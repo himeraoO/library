@@ -1,12 +1,15 @@
 package com.github.himeraoo.library.repository;
 
-import com.github.himeraoo.library.dao.BookDAO;
-import com.github.himeraoo.library.dao.GenreDAO;
+import com.github.himeraoo.library.dao.SQLQuery;
 import com.github.himeraoo.library.jdbc.SessionManager;
 import com.github.himeraoo.library.models.Genre;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,37 +17,53 @@ public class GenreRepositoryImpl implements GenreRepository {
 
     private final SessionManager sessionManager;
 
-    private final GenreDAO genreDAO;
-    private final BookDAO bookDAO;
-
-    public GenreRepositoryImpl(SessionManager sessionManager, GenreDAO genreDAO, BookDAO bookDAO) {
+    public GenreRepositoryImpl(SessionManager sessionManager) {
         this.sessionManager = sessionManager;
-        this.genreDAO = genreDAO;
-        this.bookDAO = bookDAO;
     }
 
     @Override
     public Optional<Genre> findById(int genreId) throws SQLException {
         sessionManager.beginSession();
 
-        Optional<Genre> optionalGenre;
+        Genre genre = null;
         try (Connection connection = sessionManager.getCurrentSession()) {
-            optionalGenre = genreDAO.findGenreById(genreId, connection);
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreFindById.QUERY)) {
+                pst.setInt(1, genreId);
+                try (ResultSet rs = pst.executeQuery()) {
+                    Genre dbGenre = new Genre();
+                    while (rs.next()) {
+                        dbGenre.setId((Integer.parseInt(rs.getString("id"))));
+                        dbGenre.setName((rs.getString("name")));
+                    }
+                    if (dbGenre.getId() != 0) {
+                        genre = dbGenre;
+                    }
+                }
+            }
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
             sessionManager.rollbackSession();
             throw ex;
         }
-        return optionalGenre;
+        return Optional.ofNullable(genre);
     }
 
     @Override
     public List<Genre> findAll() throws SQLException {
         sessionManager.beginSession();
 
-        List<Genre> genreList;
+        List<Genre> genreList = new ArrayList<>();
         try (Connection connection = sessionManager.getCurrentSession()) {
-            genreList = genreDAO.findAllGenre(connection);
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreFindAll.QUERY)) {
+                try (ResultSet rs = pst.executeQuery()) {
+                    while (rs.next()) {
+                        Genre dbGenre = new Genre();
+                        dbGenre.setId((Integer.parseInt(rs.getString("id"))));
+                        dbGenre.setName((rs.getString("name")));
+                        genreList.add(dbGenre);
+                    }
+                }
+            }
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
             sessionManager.rollbackSession();
@@ -61,9 +80,26 @@ public class GenreRepositoryImpl implements GenreRepository {
         try (Connection connection = sessionManager.getCurrentSession()) {
             sessionManager.startTransaction();
 
-            int genreCount = genreDAO.countGenreByName(genre.getName(), connection);
+            int genreCount = 0;
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_CountGenreByName.QUERY)) {
+                pst.setString(1, genre.getName());
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) {
+                        genreCount = rs.getInt("Count(*)");
+                    }
+                }
+            }
             if (genreCount == 0) {
-                genreId = genreDAO.saveGenre(genre, connection);
+                try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreSave.QUERY, Statement.RETURN_GENERATED_KEYS)) {
+                    pst.setString(1, genre.getName());
+                    pst.executeUpdate();
+
+                    try (ResultSet rs = pst.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            genreId = rs.getInt(1);
+                        }
+                    }
+                }
             } else {
                 genreId = -1;
             }
@@ -86,9 +122,21 @@ public class GenreRepositoryImpl implements GenreRepository {
         try (Connection connection = sessionManager.getCurrentSession()) {
             sessionManager.startTransaction();
 
-            int genreCount = genreDAO.countGenreByName(genre.getName(), connection);
+            int genreCount = 0;
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_CountGenreByName.QUERY)) {
+                pst.setString(1, genre.getName());
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) {
+                        genreCount = rs.getInt("Count(*)");
+                    }
+                }
+            }
             if (genreCount == 0) {
-                rowsUpdated = genreDAO.updatedGenre(genre, connection);
+                try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreUpdateById.QUERY)) {
+                    pst.setString(1, genre.getName());
+                    pst.setInt(2, genre.getId());
+                    rowsUpdated = pst.executeUpdate();
+                }
             } else {
                 rowsUpdated = -1;
             }
@@ -111,9 +159,20 @@ public class GenreRepositoryImpl implements GenreRepository {
         try (Connection connection = sessionManager.getCurrentSession()) {
             sessionManager.startTransaction();
 
-            int bookCount = bookDAO.countBookByGenreId(genreId, connection);
+            int bookCount = 0;
+            try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_CountBookByGenreId.QUERY)) {
+                pst.setInt(1, genreId);
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) {
+                        bookCount = rs.getInt("Count(*)");
+                    }
+                }
+            }
             if (bookCount == 0) {
-                rowsUpdated = genreDAO.deleteGenre(genreId, connection);
+                try (PreparedStatement pst = connection.prepareStatement(SQLQuery.QUERY_GenreDeleteById.QUERY)) {
+                    pst.setInt(1, genreId);
+                    rowsUpdated = pst.executeUpdate();
+                }
             } else {
                 rowsUpdated = -1;
             }

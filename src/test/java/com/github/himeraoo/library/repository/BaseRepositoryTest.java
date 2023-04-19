@@ -44,9 +44,9 @@ public class BaseRepositoryTest {
     @BeforeEach
     public void init() throws SQLException {
 
-        authorRepository = new AuthorRepositoryImpl(sessionManager, authorDAO, genreDAO, bookDAO);
-        genreRepository = new GenreRepositoryImpl(sessionManager, genreDAO, bookDAO);
-        bookRepository = new BookRepositoryImpl(sessionManager, bookDAO, genreDAO, authorDAO);
+        authorRepository = new AuthorRepositoryImpl(sessionManager);
+        genreRepository = new GenreRepositoryImpl(sessionManager);
+        bookRepository = new BookRepositoryImpl(sessionManager);
 
         lenient().when(sessionManager.getCurrentSession()).thenReturn(connection);
 
