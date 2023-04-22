@@ -39,8 +39,10 @@ public class TestUtils {
     @NotNull
     public static Book getFullBook(int bookId) {
         Genre genre = getGenre(1, "genre1");
-        Author author = getAuthorWithoutBooks(1, "author_name1", "author_surname1");
-        return getBook(bookId, "book1", genre, Collections.singletonList(author));
+        Author author1 = getAuthorWithoutBooks(1, "author_name1", "author_surname1");
+        Author author3 = getAuthorWithoutBooks(3, "author_name3", "author_surname3");
+        Author author5 = getAuthorWithoutBooks(5, "author_name5", "author_surname5");
+        return getBook(bookId, "book1", genre, Arrays.asList(author1, author3, author5));
     }
 
     @NotNull

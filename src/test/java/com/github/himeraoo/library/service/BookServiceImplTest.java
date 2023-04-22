@@ -40,7 +40,7 @@ class BookServiceImplTest extends BaseServiceTest {
 
         BookDTO bookDTOFromBD = bookService.findById(bookID);
 
-        Mockito.verify(bookRepository, Mockito.times(1)).findById(bookID);
+        Mockito.verify(bookDAO, Mockito.times(1)).findById(bookID);
         Assertions.assertAll("Проверка получаемого DTO", () -> Assertions.assertEquals(bookDTO, bookDTOFromBD), () -> Assertions.assertEquals(bookDTO.getAuthorList(), bookDTOFromBD.getAuthorList()));
     }
 
@@ -66,7 +66,7 @@ class BookServiceImplTest extends BaseServiceTest {
 
         List<BookDTO> bookDTOList = bookService.findAll();
 
-        Mockito.verify(bookRepository, Mockito.times(1)).findAll();
+        Mockito.verify(bookDAO, Mockito.times(1)).findAll();
         Assertions.assertEquals(expectedBookDTOList, bookDTOList);
     }
 
@@ -74,7 +74,7 @@ class BookServiceImplTest extends BaseServiceTest {
     @DisplayName("Тест ошибки \"Элементы не найдены\" в поиске всех книг")
     @Story(value = "Тестирование метода поиска всех элементов")
     void findAllThrowException() throws SQLException {
-        lenient().when(bookRepository.findAll()).thenReturn(Collections.emptyList());
+        lenient().when(bookDAO.findAll()).thenReturn(Collections.emptyList());
 
         Assertions.assertThrows(ElementHasNotFoundException.class, () -> {
             bookService.findAll();
@@ -92,7 +92,7 @@ class BookServiceImplTest extends BaseServiceTest {
 
         int addedId = bookService.save(bookDTO);
 
-        Mockito.verify(bookRepository, Mockito.times(1)).save(book);
+        Mockito.verify(bookDAO, Mockito.times(1)).save(book);
         Assertions.assertEquals(expectedAddedID, addedId);
     }
 
@@ -107,7 +107,7 @@ class BookServiceImplTest extends BaseServiceTest {
 
         int addedId = bookService.save(bookDTO);
 
-        Mockito.verify(bookRepository, Mockito.times(1)).save(book);
+        Mockito.verify(bookDAO, Mockito.times(1)).save(book);
         Assertions.assertEquals(expectedAddedID, addedId);
     }
 
@@ -122,7 +122,7 @@ class BookServiceImplTest extends BaseServiceTest {
 
         int addedId = bookService.save(bookDTO);
 
-        Mockito.verify(bookRepository, Mockito.times(1)).save(book);
+        Mockito.verify(bookDAO, Mockito.times(1)).save(book);
         Assertions.assertEquals(expectedAddedID, addedId);
     }
 
@@ -137,7 +137,7 @@ class BookServiceImplTest extends BaseServiceTest {
 
         int updatedId = bookService.update(bookDTO);
 
-        Mockito.verify(bookRepository, Mockito.times(1)).update(book);
+        Mockito.verify(bookDAO, Mockito.times(1)).update(book);
         Assertions.assertEquals(expectedUpdatedID, updatedId);
     }
 
@@ -177,7 +177,7 @@ class BookServiceImplTest extends BaseServiceTest {
 
         int deletedId = bookService.deleteById(bookID);
 
-        Mockito.verify(bookRepository, Mockito.times(1)).deleteById(bookID);
+        Mockito.verify(bookDAO, Mockito.times(1)).deleteById(bookID);
         Assertions.assertEquals(expectedDeletedID, deletedId);
     }
 

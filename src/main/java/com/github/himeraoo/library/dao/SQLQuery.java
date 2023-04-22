@@ -58,7 +58,7 @@ public enum SQLQuery {
 
     QUERY_CountAuthorByNameAndSurname("select Count(*) from author where name = ? AND surname = ?");
 
-    final String QUERY;
+    public final String QUERY;
 
     SQLQuery(String QUERY) {
         this.QUERY = QUERY;
