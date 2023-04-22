@@ -5,7 +5,7 @@ import com.github.himeraoo.library.exception.ElementHasNotAddedException;
 import com.github.himeraoo.library.exception.ElementHasNotFoundException;
 import com.github.himeraoo.library.exception.ElementHasNotUpdatedException;
 import com.github.himeraoo.library.models.Author;
-import com.github.himeraoo.library.repository.AuthorRepository;
+import com.github.himeraoo.library.dao.AuthorDAO;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,15 +14,15 @@ import java.util.Optional;
 
 public class AuthorServiceImpl implements AuthorService {
 
-    private final AuthorRepository authorRepository;
+    private final AuthorDAO authorDAO;
 
-    public AuthorServiceImpl(AuthorRepository authorRepository) {
-        this.authorRepository = authorRepository;
+    public AuthorServiceImpl(AuthorDAO authorDAO) {
+        this.authorDAO = authorDAO;
     }
 
     @Override
     public AuthorDTO findById(int authorId) throws SQLException, ElementHasNotFoundException {
-        Optional<Author> optionalAuthor = authorRepository.findById(authorId);
+        Optional<Author> optionalAuthor = authorDAO.findById(authorId);
         if (optionalAuthor.isPresent()) {
             Author dbAuthor = optionalAuthor.get();
             return new AuthorDTO(dbAuthor.getId(), dbAuthor.getName(), dbAuthor.getSurname(), dbAuthor.getBookList());
@@ -33,7 +33,7 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public List<AuthorDTO> findAll() throws SQLException, ElementHasNotFoundException {
-        List<Author> authorList = authorRepository.findAll();
+        List<Author> authorList = authorDAO.findAll();
         if (authorList.isEmpty()) {
             throw new ElementHasNotFoundException("Элементы не найдены.");
         } else {
@@ -53,7 +53,7 @@ public class AuthorServiceImpl implements AuthorService {
         author.setName(authorDTO.getName());
         author.setSurname(authorDTO.getSurname());
         author.setBookList(authorDTO.getBookList());
-        int add = authorRepository.save(author);
+        int add = authorDAO.save(author);
         if (add == 0) {
             throw new ElementHasNotAddedException("Элемент не был добавлен.");
         }
@@ -72,7 +72,7 @@ public class AuthorServiceImpl implements AuthorService {
         author.setName(authorDTO.getName());
         author.setSurname(authorDTO.getSurname());
         author.setBookList(authorDTO.getBookList());
-        int upd = authorRepository.update(author);
+        int upd = authorDAO.update(author);
         if (upd == 0) {
             throw new ElementHasNotFoundException("Элемент с id  = " + authorDTO.getId() + " не найден.");
         }
@@ -86,7 +86,7 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public int deleteById(int authorId) throws SQLException, ElementHasNotFoundException {
-        int del = authorRepository.deleteById(authorId);
+        int del = authorDAO.deleteById(authorId);
         if (del == 0) {
             throw new ElementHasNotFoundException("Элемент с id  = " + authorId + " не найден.");
         }

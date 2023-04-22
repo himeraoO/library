@@ -37,7 +37,7 @@ class AuthorServiceImplTest extends BaseServiceTest {
 
         AuthorDTO authorDTOFromBD = authorService.findById(authorID);
 
-        Mockito.verify(authorRepository, Mockito.times(1)).findById(authorID);
+        Mockito.verify(authorDAO, Mockito.times(1)).findById(authorID);
         Assertions.assertAll("Проверка получаемого DTO", () -> Assertions.assertEquals(authorDTO, authorDTOFromBD), () -> Assertions.assertEquals(authorDTO.getBookList(), authorDTOFromBD.getBookList()));
     }
 
@@ -63,7 +63,7 @@ class AuthorServiceImplTest extends BaseServiceTest {
 
         List<AuthorDTO> authorDTOList = authorService.findAll();
 
-        Mockito.verify(authorRepository, Mockito.times(1)).findAll();
+        Mockito.verify(authorDAO, Mockito.times(1)).findAll();
         Assertions.assertEquals(expectedAuthorDTOList, authorDTOList);
     }
 
@@ -71,7 +71,7 @@ class AuthorServiceImplTest extends BaseServiceTest {
     @DisplayName("Тест ошибки \"Элементы не найдены\" в поиске всех авторов")
     @Story(value = "Тестирование метода поиска всех элементов")
     void findAllThrowException() throws SQLException {
-        lenient().when(authorRepository.findAll()).thenReturn(Collections.emptyList());
+        lenient().when(authorDAO.findAll()).thenReturn(Collections.emptyList());
 
         Assertions.assertThrows(ElementHasNotFoundException.class, () -> {
             authorService.findAll();
@@ -89,7 +89,7 @@ class AuthorServiceImplTest extends BaseServiceTest {
 
         int addedId = authorService.save(authorDTO);
 
-        Mockito.verify(authorRepository, Mockito.times(1)).save(author);
+        Mockito.verify(authorDAO, Mockito.times(1)).save(author);
         Assertions.assertEquals(expectedAddedID, addedId);
     }
 
@@ -132,7 +132,7 @@ class AuthorServiceImplTest extends BaseServiceTest {
 
         int updatedId = authorService.update(authorDTO);
 
-        Mockito.verify(authorRepository, Mockito.times(1)).update(author);
+        Mockito.verify(authorDAO, Mockito.times(1)).update(author);
         Assertions.assertEquals(expectedUpdatedID, updatedId);
     }
 
@@ -156,7 +156,7 @@ class AuthorServiceImplTest extends BaseServiceTest {
         int authorID = 1;
         Author author = getFullAuthor(authorID, "author_name11", "author_surname11");
         AuthorDTO authorDTO = getAuthorDTO(author);
-        lenient().when(authorRepository.update(author)).thenReturn(-1);
+        lenient().when(authorDAO.update(author)).thenReturn(-1);
 
         Assertions.assertThrows(ElementHasNotUpdatedException.class, () -> {
             authorService.update(authorDTO);
@@ -172,7 +172,7 @@ class AuthorServiceImplTest extends BaseServiceTest {
 
         int deletedId = authorService.deleteById(authorID);
 
-        Mockito.verify(authorRepository, Mockito.times(1)).deleteById(authorID);
+        Mockito.verify(authorDAO, Mockito.times(1)).deleteById(authorID);
         Assertions.assertEquals(expectedDeletedID, deletedId);
     }
 

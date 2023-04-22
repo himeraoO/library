@@ -6,7 +6,7 @@ import com.github.himeraoo.library.exception.ElementHasNotDeletedException;
 import com.github.himeraoo.library.exception.ElementHasNotFoundException;
 import com.github.himeraoo.library.exception.ElementHasNotUpdatedException;
 import com.github.himeraoo.library.models.Genre;
-import com.github.himeraoo.library.repository.GenreRepository;
+import com.github.himeraoo.library.dao.GenreDAO;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,15 +15,15 @@ import java.util.Optional;
 
 public class GenreServiceImpl implements GenreService {
 
-    private final GenreRepository genreRepository;
+    private final GenreDAO genreDAO;
 
-    public GenreServiceImpl(GenreRepository genreRepository) {
-        this.genreRepository = genreRepository;
+    public GenreServiceImpl(GenreDAO genreDAO) {
+        this.genreDAO = genreDAO;
     }
 
     @Override
     public GenreDTO findById(int genreId) throws SQLException, ElementHasNotFoundException {
-        Optional<Genre> optionalGenre = genreRepository.findById(genreId);
+        Optional<Genre> optionalGenre = genreDAO.findById(genreId);
         if (optionalGenre.isPresent()) {
             Genre dbGenre = optionalGenre.get();
             return new GenreDTO(dbGenre.getId(), dbGenre.getName());
@@ -34,7 +34,7 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public List<GenreDTO> findAll() throws SQLException, ElementHasNotFoundException {
-        List<Genre> genreList = genreRepository.findAll();
+        List<Genre> genreList = genreDAO.findAll();
         if (genreList.isEmpty()) {
             throw new ElementHasNotFoundException("Элементы не найдены.");
         } else {
@@ -52,7 +52,7 @@ public class GenreServiceImpl implements GenreService {
         Genre genre = new Genre();
         genre.setId(genreDTO.getId());
         genre.setName(genreDTO.getName());
-        int add = genreRepository.save(genre);
+        int add = genreDAO.save(genre);
         if (add == 0) {
             throw new ElementHasNotAddedException("Элемент не был добавлен.");
         }
@@ -69,7 +69,7 @@ public class GenreServiceImpl implements GenreService {
         Genre genre = new Genre();
         genre.setId(genreDTO.getId());
         genre.setName(genreDTO.getName());
-        int upd = genreRepository.update(genre);
+        int upd = genreDAO.update(genre);
         if (upd == 0) {
             throw new ElementHasNotFoundException("Элемент с id  = " + genreDTO.getId() + " не найден.");
         }
@@ -83,7 +83,7 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public int deleteById(int genreId) throws SQLException, ElementHasNotFoundException, ElementHasNotDeletedException {
-        int del = genreRepository.deleteById(genreId);
+        int del = genreDAO.deleteById(genreId);
         if (del == 0) {
             throw new ElementHasNotFoundException("Элемент с id  = " + genreId + " не найден.");
         }

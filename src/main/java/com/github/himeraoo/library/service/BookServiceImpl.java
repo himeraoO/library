@@ -5,7 +5,7 @@ import com.github.himeraoo.library.exception.ElementHasNotAddedException;
 import com.github.himeraoo.library.exception.ElementHasNotFoundException;
 import com.github.himeraoo.library.exception.ElementHasNotUpdatedException;
 import com.github.himeraoo.library.models.Book;
-import com.github.himeraoo.library.repository.BookRepository;
+import com.github.himeraoo.library.dao.BookDAO;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,15 +14,15 @@ import java.util.Optional;
 
 public class BookServiceImpl implements BookService {
 
-    private final BookRepository bookRepository;
+    private final BookDAO bookDAO;
 
-    public BookServiceImpl(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
+    public BookServiceImpl(BookDAO bookDAO) {
+        this.bookDAO = bookDAO;
     }
 
     @Override
     public BookDTO findById(int bookId) throws SQLException, ElementHasNotFoundException {
-        Optional<Book> optionalBook = bookRepository.findById(bookId);
+        Optional<Book> optionalBook = bookDAO.findById(bookId);
         if (optionalBook.isPresent()) {
             Book dbBook = optionalBook.get();
             return new BookDTO(dbBook.getId(), dbBook.getTitle(), dbBook.getGenre(), dbBook.getAuthorList());
@@ -33,7 +33,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDTO> findAll() throws SQLException, ElementHasNotFoundException {
-        List<Book> bookList = bookRepository.findAll();
+        List<Book> bookList = bookDAO.findAll();
         if (bookList.isEmpty()) {
             throw new ElementHasNotFoundException("Элементы не найдены.");
         } else {
@@ -53,7 +53,7 @@ public class BookServiceImpl implements BookService {
         book.setTitle(bookDTO.getTitle());
         book.setGenre(bookDTO.getGenre());
         book.setAuthorList(bookDTO.getAuthorList());
-        int add = bookRepository.save(book);
+        int add = bookDAO.save(book);
         if (add == 0) {
             throw new ElementHasNotAddedException("Элемент не был добавлен.");
         }
@@ -72,7 +72,7 @@ public class BookServiceImpl implements BookService {
         book.setTitle(bookDTO.getTitle());
         book.setGenre(bookDTO.getGenre());
         book.setAuthorList(bookDTO.getAuthorList());
-        int upd = bookRepository.update(book);
+        int upd = bookDAO.update(book);
         if (upd == 0) {
             throw new ElementHasNotFoundException("Элемент с id  = " + bookDTO.getId() + " не найден.");
         }
@@ -86,7 +86,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public int deleteById(int bookId) throws SQLException, ElementHasNotFoundException {
-        int del = bookRepository.deleteById(bookId);
+        int del = bookDAO.deleteById(bookId);
         if (del == 0) {
             throw new ElementHasNotFoundException("Элемент с id  = " + bookId + " не найден.");
         }

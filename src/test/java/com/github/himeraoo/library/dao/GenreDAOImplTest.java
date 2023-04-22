@@ -6,81 +6,55 @@ import com.github.himeraoo.library.models.Genre;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.github.himeraoo.library.util.TestUtils.getFullGenre;
+import static com.github.himeraoo.library.util.TestUtils.getGenre;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Epic(value = "Тестирование слоя DAO")
 @Feature(value = "Тестирование GenreDAO")
-@Testcontainers
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class GenreDAOImplTest extends BaseDAOWithBDTest {
+class GenreDAOImplTest extends BaseDAOTest {
 
-    private SessionManager sessionManager;
     private GenreDAO genreDAO;
 
     @BeforeEach
     void setUp() {
-        mySQLContainer.start();
-        sessionManager = new SessionManagerJDBC(
+        SessionManager sessionManager = new SessionManagerJDBC(
                 mySQLContainer.getJdbcUrl(),
                 mySQLContainer.getUsername(),
                 mySQLContainer.getPassword(),
-                mySQLContainer.getDriverClassName());
+                mySQLContainer.getDriverClassName()
+        );
 
-        genreDAO = new GenreDAOImpl();
-    }
-
-    @AfterEach
-    void tearDown() {
-        mySQLContainer.stop();
+        genreDAO = new GenreDAOImpl(sessionManager);
     }
 
     @Test
     @Order(1)
     @DisplayName("Тест поиска жанра по ID")
     @Story(value = "Тестирование метода поиска по ID")
-    void findGenreById() {
-        sessionManager.beginSession();
-
+    void findById() throws SQLException {
         int genreId = 1;
-        Optional<Genre> optionalGenre = Optional.empty();
-        Genre genreDB = new Genre();
+        Genre expectedGenre = getFullGenre(genreId);
 
-        try (Connection connection = sessionManager.getCurrentSession()) {
-            optionalGenre = genreDAO.findGenreById(genreId, connection);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+        Optional<Genre> optionalGenre = genreDAO.findById(genreId);
 
-        if (optionalGenre.isPresent()) {
-            genreDB = optionalGenre.get();
-        }
-
-        Genre genre = new Genre();
-        genre.setId(1);
-        genre.setName("genre1");
-
-        Genre genreDBFinal = genreDB;
+        Genre genreDB = optionalGenre.get();
 
         Assertions.assertAll("Проверка получения жанра по id",
-                () -> assertEquals(genreId, genreDBFinal.getId(), "Должно быть значение: " + genreId),
-                () -> assertEquals(genre, genreDBFinal)
+                () -> assertNotNull(genreDB),
+                () -> assertEquals(genreId, genreDB.getId(), "Должно быть значение: " + genreId),
+                () -> assertEquals(expectedGenre, genreDB)
         );
     }
 
@@ -88,58 +62,40 @@ class GenreDAOImplTest extends BaseDAOWithBDTest {
     @Order(2)
     @DisplayName("Тест поиска всех жанров")
     @Story(value = "Тестирование метода поиска всех элементов")
-    void findAllGenre() {
-        sessionManager.beginSession();
+    void findAll() throws SQLException {
+        List<Genre> genreListFromBD = genreDAO.findAll();
 
-        List<Genre> genreList = new ArrayList<>();
-        try (Connection connection = sessionManager.getCurrentSession()) {
-            genreList = genreDAO.findAllGenre(connection);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        Assertions.assertEquals(6, genreList.size(), "Размер полученного списка должен быть 6");
+        assertEquals(6, genreListFromBD.size(),
+                "Размер полученного списка должен быть 6");
     }
 
     @Test
     @Order(3)
     @DisplayName("Тест сохранения нового жанра")
     @Story(value = "Тестирование метода сохранения элемента")
-    void saveGenre() {
-        sessionManager.beginSession();
+    void save() throws SQLException {
+        int expectedAddedId = 7;
+        int genreId = 7;
+        String genreName = "save_genre_name";
+        Genre genreForSave = getGenre(genreId, genreName);
+        List<Genre> genreListFromBDBefore = genreDAO.findAll();
 
-        Genre genre = new Genre();
-        genre.setName("genre7");
+        int addedId = genreDAO.save(genreForSave);
 
-        int expectedGenreId = 7;
-        int genreId = 0;
-
-        try (Connection connection = sessionManager.getCurrentSession()) {
-            genreId = genreDAO.saveGenre(genre, connection);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        sessionManager.beginSession();
-
-        Optional<Genre> optionalGenre = Optional.empty();
-        Genre genreDB = new Genre();
-
-        try (Connection connection = sessionManager.getCurrentSession()) {
-            optionalGenre = genreDAO.findGenreById(expectedGenreId, connection);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        if (optionalGenre.isPresent()) {
-            genreDB = optionalGenre.get();
-        }
-
-        Genre genreDBFinal = genreDB;
-        int finalGenreId = genreId;
+        Optional<Genre> optionalGenre = genreDAO.findById(7);
+        Genre genreDB = optionalGenre.get();
+        List<Genre> genreListFromBDAfter = genreDAO.findAll();
 
         Assertions.assertAll("Проверка сохранения жанра",
-                () -> assertEquals(expectedGenreId, finalGenreId, "Значение ID должно быть " + expectedGenreId),
-                () -> assertEquals(genre, genreDBFinal)
+                () -> assertEquals(6, genreListFromBDBefore.size(),
+                        "Размер начального списка должен быть 6"),
+                () -> assertNotNull(genreDB),
+                () -> assertEquals(expectedAddedId, addedId),
+                () -> assertEquals(genreId, genreDB.getId(),
+                        "Должно быть значение: " + genreId),
+                () -> assertEquals(genreForSave, genreDB),
+                () -> assertEquals(7, genreListFromBDAfter.size(),
+                        "Размер конечного списка должен быть 7")
         );
     }
 
@@ -147,45 +103,23 @@ class GenreDAOImplTest extends BaseDAOWithBDTest {
     @Order(4)
     @DisplayName("Тест обновления жанра")
     @Story(value = "Тестирование метода обновления элемента")
-    void updatedGenre() {
-        sessionManager.beginSession();
+    void update() throws SQLException {
+        int genreId = 7;
+        int rowUpdatedExpected = 1;
+        String genreName = "update_genre_name";
+        Genre genreForUpdate = getGenre(genreId, genreName);
 
-        int genreId = 1;
+        int rowUpdated = genreDAO.update(genreForUpdate);
 
-        Genre genre = new Genre();
-        genre.setId(genreId);
-        genre.setName("genre7");
+        Optional<Genre> optionalGenre = genreDAO.findById(7);
+        Genre genreDB = optionalGenre.get();
 
-        int rowsUpdated = 0;
-
-        try (Connection connection = sessionManager.getCurrentSession()) {
-            rowsUpdated = genreDAO.updatedGenre(genre, connection);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        sessionManager.beginSession();
-        Optional<Genre> optionalGenre = Optional.empty();
-        Genre genreDB = new Genre();
-
-        try (Connection connection = sessionManager.getCurrentSession()) {
-            optionalGenre = genreDAO.findGenreById(genreId, connection);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        if (optionalGenre.isPresent()) {
-            genreDB = optionalGenre.get();
-        }
-
-        Genre genreDBFinal = genreDB;
-        int finalRowUpdated = rowsUpdated;
-
-
-        Assertions.assertAll("Проверка обновления жанра",
-                () -> assertEquals(1, finalRowUpdated, "Значение rowsUpdated должно быть 1"),
-                () -> assertEquals(genreId, genreDBFinal.getId(), "Значение ID должно быть " + genreId),
-                () -> assertEquals(genre, genreDBFinal)
+        Assertions.assertAll("Проверка обновления жанра по id",
+                () -> assertNotNull(genreDB),
+                () -> assertEquals(rowUpdatedExpected, rowUpdated),
+                () -> assertEquals(genreId, genreDB.getId(),
+                        "Должно быть значение: " + genreId),
+                () -> assertEquals(genreForUpdate, genreDB)
         );
     }
 
@@ -193,53 +127,21 @@ class GenreDAOImplTest extends BaseDAOWithBDTest {
     @Order(5)
     @DisplayName("Тест удаления жанра по ID")
     @Story(value = "Тестирование метода удаления элемента по ID")
-    void deleteGenre() {
-        sessionManager.beginSession();
+    void deleteById() throws SQLException {
+        int genreId = 7;
+        int rowDeletedExpected = 1;
+        List<Genre> genreListFromBDBefore = genreDAO.findAll();
 
-        int rowsUpdated = 0;
-        int genreId = 6;
-        try (Connection connection = sessionManager.getCurrentSession()) {
-            rowsUpdated = genreDAO.deleteGenre(genreId, connection);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+        int rowDeleted = genreDAO.deleteById(genreId);
 
-        sessionManager.beginSession();
-
-        Optional<Genre> optionalGenre = Optional.empty();
-
-        try (Connection connection = sessionManager.getCurrentSession()) {
-            optionalGenre = genreDAO.findGenreById(genreId, connection);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        int finalRowsUpdated = rowsUpdated;
-
-        Optional<Genre> finalOptionalGenre = optionalGenre;
+        List<Genre> genreListFromBDAfter = genreDAO.findAll();
 
         Assertions.assertAll("Проверка удаления жанра",
-                () -> assertEquals(1, finalRowsUpdated, "Значение rowsUpdated должно быть 1"),
-                () -> assertFalse(finalOptionalGenre.isPresent(), "Значение optionalBook должно быть false")
+                () -> assertEquals(7, genreListFromBDBefore.size(),
+                        "Размер начального списка должен быть 7"),
+                () -> assertEquals(rowDeletedExpected, rowDeleted),
+                () -> assertEquals(6, genreListFromBDAfter.size(),
+                        "Размер конечного списка должен быть 6")
         );
-    }
-
-    @Test
-    @Order(6)
-    @DisplayName("Тест подсчёта в БД количества жанра найденных по названию")
-    @Story(value = "Тестирование метода посчёта элементов в БД по входным параметрам")
-    void countGenreByName() {
-        sessionManager.beginSession();
-
-        String genreName = "genre1";
-        int countGenre = 0;
-
-        try (Connection connection = sessionManager.getCurrentSession()) {
-            countGenre = genreDAO.countGenreByName(genreName, connection);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        Assertions.assertEquals(1, countGenre, "Количество найденных жанров должно быть 1");
     }
 }

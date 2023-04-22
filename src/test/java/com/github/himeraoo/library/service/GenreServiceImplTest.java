@@ -40,7 +40,7 @@ class GenreServiceImplTest extends BaseServiceTest {
 
         GenreDTO genreDTOFromBD = genreService.findById(genreID);
 
-        Mockito.verify(genreRepository, Mockito.times(1)).findById(genreID);
+        Mockito.verify(genreDAO, Mockito.times(1)).findById(genreID);
         assertEquals(genreDTO, genreDTOFromBD);
     }
 
@@ -66,7 +66,7 @@ class GenreServiceImplTest extends BaseServiceTest {
 
         List<GenreDTO> genreDTOList = genreService.findAll();
 
-        Mockito.verify(genreRepository, Mockito.times(1)).findAll();
+        Mockito.verify(genreDAO, Mockito.times(1)).findAll();
         assertEquals(expectedGenreDTOList, genreDTOList);
     }
 
@@ -74,7 +74,7 @@ class GenreServiceImplTest extends BaseServiceTest {
     @DisplayName("Тест ошибки \"Элементы не найдены\" в поиске всех жанров")
     @Story(value = "Тестирование метода поиска всех элементов")
     void findAllThrowException() throws SQLException {
-        lenient().when(genreRepository.findAll()).thenReturn(Collections.emptyList());
+        lenient().when(genreDAO.findAll()).thenReturn(Collections.emptyList());
 
         assertThrows(ElementHasNotFoundException.class, () -> {
             genreService.findAll();
@@ -92,7 +92,7 @@ class GenreServiceImplTest extends BaseServiceTest {
 
         int addedId = genreService.save(genreDTO);
 
-        Mockito.verify(genreRepository, Mockito.times(1)).save(genre);
+        Mockito.verify(genreDAO, Mockito.times(1)).save(genre);
         assertEquals(expectedAddedID, addedId);
     }
 
@@ -133,7 +133,7 @@ class GenreServiceImplTest extends BaseServiceTest {
 
         int updatedId = genreService.update(genreDTO);
 
-        Mockito.verify(genreRepository, Mockito.times(1)).update(genre);
+        Mockito.verify(genreDAO, Mockito.times(1)).update(genre);
         assertEquals(expectedUpdatedID, updatedId);
     }
 
@@ -172,7 +172,7 @@ class GenreServiceImplTest extends BaseServiceTest {
 
         int deletedId = genreService.deleteById(genreID);
 
-        Mockito.verify(genreRepository, Mockito.times(1)).deleteById(genreID);
+        Mockito.verify(genreDAO, Mockito.times(1)).deleteById(genreID);
         assertEquals(expectedDeletedID, deletedId);
     }
 

@@ -2,12 +2,12 @@ package com.github.himeraoo.library.servlets;
 
 import com.github.himeraoo.library.jdbc.SessionManager;
 import com.github.himeraoo.library.jdbc.SessionManagerJDBC;
-import com.github.himeraoo.library.repository.AuthorRepository;
-import com.github.himeraoo.library.repository.AuthorRepositoryImpl;
-import com.github.himeraoo.library.repository.BookRepository;
-import com.github.himeraoo.library.repository.BookRepositoryImpl;
-import com.github.himeraoo.library.repository.GenreRepository;
-import com.github.himeraoo.library.repository.GenreRepositoryImpl;
+import com.github.himeraoo.library.dao.AuthorDAO;
+import com.github.himeraoo.library.dao.AuthorDAOImpl;
+import com.github.himeraoo.library.dao.BookDAO;
+import com.github.himeraoo.library.dao.BookDAOImpl;
+import com.github.himeraoo.library.dao.GenreDAO;
+import com.github.himeraoo.library.dao.GenreDAOImpl;
 import com.github.himeraoo.library.service.AuthorService;
 import com.github.himeraoo.library.service.AuthorServiceImpl;
 import com.github.himeraoo.library.service.BookService;
@@ -34,26 +34,26 @@ public class ContextListener implements ServletContextListener {
         SessionManager sessionManager = null;
 
         try (InputStream inStream = servletContext.getResourceAsStream("/WEB-INF/resources/app.properties")) {
-
             Properties properties = new Properties();
+            properties.load(inStream);
 
-            try {
-                properties.load(inStream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            sessionManager = new SessionManagerJDBC(properties.getProperty("dbUrl"), properties.getProperty("dbUsername"), properties.getProperty("dbPassword"), properties.getProperty("dbDriver"));
+            sessionManager = new SessionManagerJDBC(
+                    properties.getProperty("dbUrl"),
+                    properties.getProperty("dbUsername"),
+                    properties.getProperty("dbPassword"),
+                    properties.getProperty("dbDriver")
+            );
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        AuthorRepository authorRepository = new AuthorRepositoryImpl(sessionManager);
-        BookRepository bookRepository = new BookRepositoryImpl(sessionManager);
-        GenreRepository genreRepository = new GenreRepositoryImpl(sessionManager);
+        AuthorDAO authorDAO = new AuthorDAOImpl(sessionManager);
+        BookDAO bookDAO = new BookDAOImpl(sessionManager);
+        GenreDAO genreDAO = new GenreDAOImpl(sessionManager);
 
-        AuthorService authorService = new AuthorServiceImpl(authorRepository);
-        BookService bookService = new BookServiceImpl(bookRepository);
-        GenreService genreService = new GenreServiceImpl(genreRepository);
+        AuthorService authorService = new AuthorServiceImpl(authorDAO);
+        BookService bookService = new BookServiceImpl(bookDAO);
+        GenreService genreService = new GenreServiceImpl(genreDAO);
 
         servletContext.setAttribute("authorService", authorService);
         servletContext.setAttribute("bookService", bookService);
