@@ -41,7 +41,7 @@ class BookRESTServletTest extends BaseRestServletTest {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
-        lenient().when(req.getRequestURI()).thenReturn("/book/");
+        lenient().when(req.getRequestURI()).thenReturn("/api/rest/book/");
         lenient().when(resp.getWriter()).thenReturn(writer);
 
         List<BookDTO> expectedBookDTOList = Collections.singletonList(getBookDTO(getFullBook(1)));
@@ -61,7 +61,7 @@ class BookRESTServletTest extends BaseRestServletTest {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
-        lenient().when(req.getRequestURI()).thenReturn("/book/1");
+        lenient().when(req.getRequestURI()).thenReturn("/api/rest/book/1");
         lenient().when(resp.getWriter()).thenReturn(writer);
 
         BookDTO expectedBookDTO = getBookDTO(getFullBook(1));
@@ -81,7 +81,7 @@ class BookRESTServletTest extends BaseRestServletTest {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
-        lenient().when(req.getRequestURI()).thenReturn("/book/1");
+        lenient().when(req.getRequestURI()).thenReturn("/api/rest/book/1");
         lenient().when(resp.getWriter()).thenReturn(writer);
 
         int deleted = 1;
@@ -101,7 +101,7 @@ class BookRESTServletTest extends BaseRestServletTest {
         PrintWriter writer = Mockito.mock(PrintWriter.class);
         BufferedReader reader = Mockito.mock(BufferedReader.class);
 
-        lenient().when(req.getRequestURI()).thenReturn("/book/1");
+        lenient().when(req.getRequestURI()).thenReturn("/api/rest/book/1");
         lenient().when(resp.getWriter()).thenReturn(writer);
         lenient().when(req.getReader()).thenReturn(reader);
         String json = "{ \"id\": 1, \"title\": \"book1\", \"genre\": { \"id\": 1, \"name\": \"genre1\" }, \"authorList\": [ { \"id\": 1, \"name\": \"author_name1\", \"surname\": \"author_surname1\", \"bookList\": [] }, { \"id\": 0, \"name\": \"author_name5\", \"surname\": \"author_surname5\", \"bookList\": [] } ] }";
@@ -126,7 +126,7 @@ class BookRESTServletTest extends BaseRestServletTest {
         PrintWriter writer = Mockito.mock(PrintWriter.class);
         BufferedReader reader = Mockito.mock(BufferedReader.class);
 
-        lenient().when(req.getRequestURI()).thenReturn("/book/");
+        lenient().when(req.getRequestURI()).thenReturn("/api/rest/book/");
         lenient().when(resp.getWriter()).thenReturn(writer);
         lenient().when(req.getReader()).thenReturn(reader);
         String json = "{ \"id\": 1, \"title\": \"book1\", \"genre\": { \"id\": 1, \"name\": \"genre1\" }, \"authorList\": [ { \"id\": 1, \"name\": \"author_name1\", \"surname\": \"author_surname1\", \"bookList\": [] }, { \"id\": 0, \"name\": \"author_name5\", \"surname\": \"author_surname5\", \"bookList\": [] } ] }";

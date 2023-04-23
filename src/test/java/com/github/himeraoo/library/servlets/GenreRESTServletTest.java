@@ -42,7 +42,7 @@ class GenreRESTServletTest extends BaseRestServletTest {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
-        lenient().when(req.getRequestURI()).thenReturn("/genre/");
+        lenient().when(req.getRequestURI()).thenReturn("/api/rest/genre/");
         lenient().when(resp.getWriter()).thenReturn(writer);
 
         List<GenreDTO> expectedGenreDTOList = Collections.singletonList(getGenreDTO(getFullGenre(1)));
@@ -62,7 +62,7 @@ class GenreRESTServletTest extends BaseRestServletTest {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
-        lenient().when(req.getRequestURI()).thenReturn("/genre/1");
+        lenient().when(req.getRequestURI()).thenReturn("/api/rest/genre/1");
         lenient().when(resp.getWriter()).thenReturn(writer);
 
         GenreDTO expectedGenreDTO = getGenreDTO(getFullGenre(1));
@@ -82,7 +82,7 @@ class GenreRESTServletTest extends BaseRestServletTest {
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
         PrintWriter writer = Mockito.mock(PrintWriter.class);
-        lenient().when(req.getRequestURI()).thenReturn("/genre/1");
+        lenient().when(req.getRequestURI()).thenReturn("/api/rest/genre/1");
         lenient().when(resp.getWriter()).thenReturn(writer);
 
         int deleted = 1;
@@ -102,7 +102,7 @@ class GenreRESTServletTest extends BaseRestServletTest {
         PrintWriter writer = Mockito.mock(PrintWriter.class);
         BufferedReader reader = Mockito.mock(BufferedReader.class);
 
-        lenient().when(req.getRequestURI()).thenReturn("/genre/1");
+        lenient().when(req.getRequestURI()).thenReturn("/api/rest/genre/1");
         lenient().when(resp.getWriter()).thenReturn(writer);
         lenient().when(req.getReader()).thenReturn(reader);
         String json = "{\"id\": 1,\"name\": \"GENRE1\"}";
@@ -127,7 +127,7 @@ class GenreRESTServletTest extends BaseRestServletTest {
         PrintWriter writer = Mockito.mock(PrintWriter.class);
         BufferedReader reader = Mockito.mock(BufferedReader.class);
 
-        lenient().when(req.getRequestURI()).thenReturn("/genre/");
+        lenient().when(req.getRequestURI()).thenReturn("/api/rest/genre/");
         lenient().when(resp.getWriter()).thenReturn(writer);
         lenient().when(req.getReader()).thenReturn(reader);
         String json = "{\"id\": 1,\"name\": \"GENRE1\"}";
