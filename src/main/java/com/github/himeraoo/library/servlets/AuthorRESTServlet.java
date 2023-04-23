@@ -18,7 +18,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@WebServlet("/author/*")
+@WebServlet("/api/rest/author/*")
 public class AuthorRESTServlet extends HttpServlet {
 
     private AuthorService authorService;
@@ -37,7 +37,7 @@ public class AuthorRESTServlet extends HttpServlet {
         ObjectMapper mapper = new ObjectMapper();
         String json = "";
 
-        if (requestPath.matches("^/author/$")) {
+        if (requestPath.matches("^/api/rest/author/$")) {
             try {
                 List<AuthorDTO> allAuthorDTOs = authorService.findAll();
                 json = mapper.writeValueAsString(allAuthorDTOs);
@@ -60,9 +60,9 @@ public class AuthorRESTServlet extends HttpServlet {
                 out.write(e.getMessage());
                 resp.setStatus(500);
             }
-        } else if (requestPath.matches("^/author/\\d+$")) {
+        } else if (requestPath.matches("^/api/rest/author/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String authorIdParam = parts[2];
+            String authorIdParam = parts[4];
             try {
                 AuthorDTO authorDTO = authorService.findById(Integer.parseInt(authorIdParam));
                 json = mapper.writeValueAsString(authorDTO);
@@ -100,9 +100,9 @@ public class AuthorRESTServlet extends HttpServlet {
         String requestPath = req.getRequestURI();
         req.setCharacterEncoding("UTF-8");
 
-        if (requestPath.matches("^/author/\\d+$")) {
+        if (requestPath.matches("^/api/rest/author/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String authorIdParam = parts[2];
+            String authorIdParam = parts[4];
             try {
                 int del = authorService.deleteById(Integer.parseInt(authorIdParam));
 
@@ -146,9 +146,9 @@ public class AuthorRESTServlet extends HttpServlet {
 
         AuthorDTO authorDTO = mapper.readValue(json, AuthorDTO.class);
 
-        if (requestPath.matches("^/author/\\d+$")) {
+        if (requestPath.matches("^/api/rest/author/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String authorIdParam = parts[2];
+            String authorIdParam = parts[4];
             try {
                 authorDTO.setId(Integer.parseInt(authorIdParam));
                 int upd = authorService.update(authorDTO);
@@ -200,7 +200,7 @@ public class AuthorRESTServlet extends HttpServlet {
 
         AuthorDTO authorDTO = mapper.readValue(json, AuthorDTO.class);
 
-        if (requestPath.matches("^/author/$")) {
+        if (requestPath.matches("^/api/rest/author/$")) {
             try {
                 int add = authorService.save(authorDTO);
 

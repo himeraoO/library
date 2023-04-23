@@ -30,7 +30,7 @@
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
         <allure-maven-plugin.version>2.12.0</allure-maven-plugin.version>
 
-        <docker.host>tcp://127.0.0.1:2375</docker.host>
+        <docker.host>http://127.0.0.1:2375/</docker.host>
     </properties>
 
     <dependencies>

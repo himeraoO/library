@@ -19,7 +19,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@WebServlet("/genre/*")
+@WebServlet("/api/rest/genre/*")
 public class GenreRESTServlet extends HttpServlet {
 
     private GenreService genreService;
@@ -38,7 +38,7 @@ public class GenreRESTServlet extends HttpServlet {
         ObjectMapper mapper = new ObjectMapper();
         String json = "";
 
-        if (requestPath.matches("^/genre/$")) {
+        if (requestPath.matches("^/api/rest/genre/$")) {
             try {
                 List<GenreDTO> allGenreDTOs = genreService.findAll();
                 json = mapper.writeValueAsString(allGenreDTOs);
@@ -61,9 +61,9 @@ public class GenreRESTServlet extends HttpServlet {
                 out.write(e.getMessage());
                 resp.setStatus(500);
             }
-        } else if (requestPath.matches("^/genre/\\d+$")) {
+        } else if (requestPath.matches("^/api/rest/genre/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String genreIdParam = parts[2];
+            String genreIdParam = parts[4];
             try {
                 GenreDTO genreDTO = genreService.findById(Integer.parseInt(genreIdParam));
                 json = mapper.writeValueAsString(genreDTO);
@@ -101,9 +101,9 @@ public class GenreRESTServlet extends HttpServlet {
         String requestPath = req.getRequestURI();
         req.setCharacterEncoding("UTF-8");
 
-        if (requestPath.matches("^/genre/\\d+$")) {
+        if (requestPath.matches("^/api/rest/genre/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String genreIdParam = parts[2];
+            String genreIdParam = parts[4];
             try {
                 int del = genreService.deleteById(Integer.parseInt(genreIdParam));
 
@@ -154,9 +154,9 @@ public class GenreRESTServlet extends HttpServlet {
 
         GenreDTO genreDTO = mapper.readValue(json, GenreDTO.class);
 
-        if (requestPath.matches("^/genre/\\d+$")) {
+        if (requestPath.matches("^/api/rest/genre/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String genreIdParam = parts[2];
+            String genreIdParam = parts[4];
             try {
                 genreDTO.setId(Integer.parseInt(genreIdParam));
                 int upd = genreService.update(genreDTO);
@@ -208,7 +208,7 @@ public class GenreRESTServlet extends HttpServlet {
 
         GenreDTO genreDTO = mapper.readValue(json, GenreDTO.class);
 
-        if (requestPath.matches("^/genre/$")) {
+        if (requestPath.matches("^/api/rest/genre/$")) {
             try {
                 int add = genreService.save(genreDTO);
 

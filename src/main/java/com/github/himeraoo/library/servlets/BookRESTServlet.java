@@ -18,7 +18,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@WebServlet("/book/*")
+@WebServlet("/api/rest/book/*")
 public class BookRESTServlet extends HttpServlet {
 
     private BookService bookService;
@@ -37,7 +37,7 @@ public class BookRESTServlet extends HttpServlet {
         ObjectMapper mapper = new ObjectMapper();
         String json = "";
 
-        if (requestPath.matches("^/book/$")) {
+        if (requestPath.matches("^/api/rest/book/$")) {
             try {
                 List<BookDTO> allBookDTOs = bookService.findAll();
                 json = mapper.writeValueAsString(allBookDTOs);
@@ -60,9 +60,9 @@ public class BookRESTServlet extends HttpServlet {
                 out.write(e.getMessage());
                 resp.setStatus(500);
             }
-        } else if (requestPath.matches("^/book/\\d+$")) {
+        } else if (requestPath.matches("^/api/rest/book/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String bookIdParam = parts[2];
+            String bookIdParam = parts[4];
             try {
                 BookDTO bookDTO = bookService.findById(Integer.parseInt(bookIdParam));
                 json = mapper.writeValueAsString(bookDTO);
@@ -100,9 +100,9 @@ public class BookRESTServlet extends HttpServlet {
         String requestPath = req.getRequestURI();
         req.setCharacterEncoding("UTF-8");
 
-        if (requestPath.matches("^/book/\\d+$")) {
+        if (requestPath.matches("^/api/rest/book/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String bookIdParam = parts[2];
+            String bookIdParam = parts[4];
             try {
                 int del = bookService.deleteById(Integer.parseInt(bookIdParam));
 
@@ -146,9 +146,9 @@ public class BookRESTServlet extends HttpServlet {
 
         BookDTO bookDTO = mapper.readValue(json, BookDTO.class);
 
-        if (requestPath.matches("^/book/\\d+$")) {
+        if (requestPath.matches("^/api/rest/book/\\d+$")) {
             String[] parts = requestPath.split("/");
-            String bookIdParam = parts[2];
+            String bookIdParam = parts[4];
             try {
                 bookDTO.setId(Integer.parseInt(bookIdParam));
                 int upd = bookService.update(bookDTO);
@@ -200,7 +200,7 @@ public class BookRESTServlet extends HttpServlet {
 
         BookDTO bookDTO = mapper.readValue(json, BookDTO.class);
 
-        if (requestPath.matches("^/book/$")) {
+        if (requestPath.matches("^/api/rest/book/$")) {
             try {
                 int add = bookService.save(bookDTO);
 
